@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>2026世界杯AI预言家 v11</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#12122a;color:#e0e0f0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;min-height:100vh;overflow-x:hidden}
+.app{max-width:520px;margin:0 auto;position:relative;min-height:100vh}
+.grid-bg{position:fixed;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(255,215,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,215,0,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.glow{position:fixed;width:300px;height:300px;border-radius:50%;filter:blur(80px);opacity:0.15;pointer-events:none;z-index:0}
+.glow1{background:gold;top:-100px;right:-50px}
+.glow2{background:#4488ff;bottom:10%;left:-80px}
+.header{text-align:center;padding:18px 16px 10px;position:relative;z-index:1}
+.header h1{font-size:22px;background:linear-gradient(135deg,gold,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:1px}
+.header .sub{font-size:12px;color:#8888aa;margin-top:4px}
+.tabs{display:flex;position:sticky;top:0;z-index:10;background:rgba(18,18,42,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,215,0,0.15);padding:0 4px}
+.tab{flex:1;text-align:center;padding:10px 0;font-size:13px;color:#8888aa;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:gold;border-bottom-color:gold}
+.page{display:none;padding:12px 10px 80px;position:relative;z-index:1}
+.page.active{display:block}
+.card{background:rgba(30,30,60,0.85);border:1px solid rgba(255,215,0,0.1);border-radius:12px;padding:14px;margin-bottom:10px;backdrop-filter:blur(8px);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.3),transparent)}
+.card.followed{border-color:rgba(255,215,0,0.35);box-shadow:0 0 12px rgba(255,215,0,0.08)}
+.match-card{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.match-card:active{transform:scale(0.98);box-shadow:0 0 15px rgba(255,215,0,0.15)}
+.match-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.match-id{font-size:12px;color:#6666aa;background:rgba(100,100,180,0.15);padding:2px 8px;border-radius:10px}
+.match-time{font-size:13px;color:#aaaacc;padding-right:36px}
+.match-teams{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.team-block{display:flex;align-items:center;gap:8px;flex:1}
+.team-block.away{flex-direction:row-reverse;text-align:right}
+.team-flag{width:36px;height:24px;border-radius:3px;object-fit:cover;border:1px solid rgba(255,255,255,0.15);flex-shrink:0}
+.team-flag-fallback{width:36px;height:24px;border-radius:3px;background:linear-gradient(135deg,#334,#223);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:gold;flex-shrink:0}
+.team-name{font-size:15px;font-weight:600;color:#e0e0f0;white-space:nowrap}
+.vs-box{font-size:20px;font-weight:800;min-width:50px;text-align:center;color:#6666aa;letter-spacing:2px}
+.score-box{font-size:38px;font-weight:900;min-width:60px;text-align:center;color:gold;text-shadow:0 0 20px rgba(255,215,0,0.3)}
+.follow-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(50,50,90,0.5);border:1px solid rgba(255,215,0,0.12);color:#8888aa;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:13px;z-index:2}
+.follow-btn:hover{background:rgba(255,215,0,0.15);color:gold}
+.follow-btn.active{background:rgba(255,215,0,0.2);color:gold;border-color:rgba(255,215,0,0.5)}
+.match-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.match-group{font-size:12px;color:#8888aa;background:rgba(100,100,180,0.1);padding:2px 8px;border-radius:8px}
+.match-venue{font-size:12px;color:#6666aa}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.chip{font-size:12px;padding:5px 10px;border-radius:16px;background:rgba(50,50,90,0.6);color:#aaaacc;cursor:pointer;border:1px solid rgba(255,215,0,0.08);transition:all .2s;white-space:nowrap}
+.chip.active{background:rgba(255,215,0,0.15);color:gold;border-color:rgba(255,215,0,0.4)}
+.cal-months{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.cal-wrap{background:rgba(30,30,60,0.5);border-radius:10px;padding:8px 6px;margin-bottom:10px;border:1px solid rgba(255,215,0,0.08)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-head{font-size:11px;color:#6666aa;text-align:center;padding:4px 0;font-weight:600}
+.cal-day{font-size:13px;text-align:center;padding:7px 0;border-radius:8px;cursor:pointer;color:#3a3a5a;transition:all .15s;position:relative;user-select:none}
+.cal-day.has-match{color:#eeeeff;background:rgba(255,215,0,0.18);font-weight:600}
+.cal-day.has-match:hover{background:rgba(255,215,0,0.3)}
+.cal-day.selected{background:rgba(255,215,0,0.35)!important;color:gold;font-weight:700;box-shadow:0 0 10px rgba(255,215,0,0.25)}
+.cal-badge{position:absolute;top:1px;right:2px;font-size:8px;background:rgba(255,215,0,0.6);color:#1a1a2e;border-radius:6px;padding:0 3px;line-height:1.4;font-weight:700}
+.detail-back{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:gold;cursor:pointer;margin-bottom:12px;padding:6px 0}
+.detail-header{text-align:center;margin-bottom:16px}
+.detail-teams{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.detail-team{display:flex;flex-direction:column;align-items:center;gap:6px}
+.detail-flag{width:52px;height:34px;border-radius:4px;object-fit:cover;border:1px solid rgba(255,255,255,0.2)}
+.detail-flag-fallback{width:52px;height:34px;border-radius:4px;background:linear-gradient(135deg,#334,#223);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:gold}
+.detail-team-name{font-size:15px;font-weight:600}
+.detail-score{font-size:42px;font-weight:900;color:gold;text-shadow:0 0 25px rgba(255,215,0,0.4)}
+.detail-vs{font-size:14px;color:#6666aa;margin:0 6px}
+.ai-card{background:rgba(25,25,55,0.9);border:1px solid rgba(255,215,0,0.08);border-radius:10px;padding:12px;margin-bottom:8px}
+.ai-card-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.ai-name{font-size:13px;font-weight:600;color:#ccccee}
+.ai-score{font-size:13px;color:gold;margin-left:auto;font-weight:600}
+.ai-body{font-size:13.5px;line-height:1.65;color:#bbbbdd}
+.ai-consensus{background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(50,50,100,0.3));border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:14px;margin-top:12px}
+.ai-consensus h3{font-size:14px;color:gold;margin-bottom:8px}
+.ai-consensus p{font-size:13.5px;line-height:1.65;color:#ccccee}
+.odds-section{margin-top:16px}
+.odds-title{font-size:16px;font-weight:700;color:gold;text-align:center;margin-bottom:12px;text-shadow:0 0 10px rgba(255,215,0,0.2)}
+.odds-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}
+.odds-table th{font-size:12px;color:#aaaacc;padding:6px 4px;border-bottom:1px solid rgba(255,215,0,0.15);text-align:center;font-weight:600}
+.odds-table td{padding:6px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04);color:#ccccee;font-size:12px}
+.odds-table tr:hover{background:rgba(255,215,0,0.04)}
+.odds-table .plat-name{color:#9999bb;text-align:left;font-weight:500}
+.odds-avg{display:flex;justify-content:center;gap:16px;margin:12px 0;flex-wrap:wrap}
+.odds-avg-item{text-align:center}
+.odds-avg-label{font-size:12px;color:#8888aa;margin-bottom:2px}
+.odds-avg-val{font-size:18px;font-weight:700}
+.odds-avg-win .odds-avg-val{color:#66ffaa}
+.odds-avg-draw .odds-avg-val{color:#ffcc44}
+.odds-avg-lose .odds-avg-val{color:#ff6666}
+.prob-bar-wrap{margin:12px 0}
+.prob-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.prob-label{font-size:12px;color:#aaaacc;min-width:40px;text-align:right}
+.prob-bar{flex:1;height:18px;background:rgba(40,40,70,0.6);border-radius:9px;overflow:hidden;position:relative}
+.prob-fill{height:100%;border-radius:9px;transition:width .6s ease}
+.prob-fill.win{background:linear-gradient(90deg,#33cc77,#66ffaa)}
+.prob-fill.draw{background:linear-gradient(90deg,#cc9900,#ffcc44)}
+.prob-fill.lose{background:linear-gradient(90deg,#cc3333,#ff6666)}
+.prob-val{font-size:12px;color:#ccccee;min-width:40px;font-weight:600}
+.odds-analysis{background:rgba(20,20,50,0.7);border:1px solid rgba(255,215,0,0.1);border-radius:10px;padding:14px;margin-top:12px}
+.odds-analysis h4{font-size:14px;color:gold;margin-bottom:8px}
+.odds-analysis p{font-size:13.5px;line-height:1.7;color:#bbbbdd}
+.empty-state{text-align:center;padding:40px 20px;color:#6666aa}
+.empty-state-icon{font-size:48px;margin-bottom:12px}
+.empty-state h3{font-size:16px;color:#aaaacc;margin-bottom:8px}
+.empty-state p{font-size:13px;line-height:1.6}
+.prompt-box{background:rgba(25,25,55,0.9);border:1px solid rgba(255,215,0,0.15);border-radius:10px;padding:14px;margin-top:12px}
+.prompt-box h4{font-size:14px;color:gold;margin-bottom:8px}
+.prompt-box p{font-size:13px;line-height:1.6;color:#bbbbdd;margin-bottom:10px}
+.prompt-box code{display:block;background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;font-size:12px;color:#ccccee;word-break:break-all}
+.rank-table{width:100%;border-collapse:collapse}
+.rank-table th{font-size:12px;color:#aaaacc;padding:8px 6px;border-bottom:1px solid rgba(255,215,0,0.15);text-align:left}
+.rank-table td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:#ccccee}
+.rank-num{font-size:14px;font-weight:700;color:gold;width:30px}
+.rank-team{display:flex;align-items:center;gap:8px}
+.rank-flag{width:24px;height:16px;border-radius:2px;object-fit:cover}
+.rank-flag-fallback{width:24px;height:16px;border-radius:2px;background:#334;display:flex;align-items:center;justify-content:center;font-size:9px;color:gold}
+.rank-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#cc9900,gold);transition:width .6s}
+.odds-page-card{margin-bottom:16px}
+.odds-page-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.odds-page-teams{font-size:14px;font-weight:600;color:#e0e0f0}
+.footer-space{height:20px}
+.disclaimer{position:fixed;bottom:0;left:0;right:0;background:rgba(14,14,30,0.95);border-top:1px solid rgba(255,215,0,0.08);padding:8px 16px;font-size:10px;color:#555577;text-align:center;line-height:1.6;z-index:50;backdrop-filter:blur(8px)}
+.disclaimer a{color:#7777aa;text-decoration:underline}
+.visit-count{font-size:10px;color:#555577;margin-top:2px}
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,gold,#ffaa00);color:#12122a;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 15px rgba(255,215,0,0.3);z-index:100;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.fab:active{transform:scale(0.92)}
+.fab-count{position:absolute;top:-4px;right:-4px;background:#ff4444;color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal-box{background:#1a1a3a;border:1px solid rgba(255,215,0,0.25);border-radius:16px;width:100%;max-width:440px;padding:20px;position:relative;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:700;color:gold;text-align:center;margin-bottom:16px}
+.modal-close{position:absolute;top:12px;right:14px;font-size:20px;color:#8888aa;cursor:pointer;transition:color .2s}
+.modal-close:hover{color:#fff}
+.modal-section{margin-bottom:16px}
+.modal-label{font-size:13px;color:#aaaacc;margin-bottom:8px;font-weight:600}
+.modal-options{display:flex;gap:8px;flex-wrap:wrap}
+.modal-opt{font-size:13px;padding:6px 14px;border-radius:20px;background:rgba(50,50,90,0.6);color:#aaaacc;cursor:pointer;border:1px solid rgba(255,215,0,0.1);transition:all .2s}
+.modal-opt.active{background:rgba(255,215,0,0.15);color:gold;border-color:rgba(255,215,0,0.4)}
+.modal-opt:hover{background:rgba(255,215,0,0.1)}
+.modal-prompt{background:rgba(10,10,30,0.8);border:1px solid rgba(255,215,0,0.12);border-radius:10px;padding:12px;font-size:13px;line-height:1.7;color:#ccccee;margin-bottom:12px;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.modal-copy-btn{width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,gold,#ffaa00);color:#12122a;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:transform .15s}
+.modal-copy-btn:active{transform:scale(0.97)}
+.modal-copied{color:#66ffaa;font-size:13px;text-align:center;margin-top:8px;display:none}
+.modal-copied.show{display:block}
+.cal-day.past{color:#4a4a6a!important;background:rgba(30,30,50,0.3)!important;opacity:0.5}
+.cal-day.past.has-match{color:#6a6a8a!important;background:rgba(50,50,70,0.3)!important;opacity:0.5}
+.cal-day.today{background:rgba(68,136,255,0.28)!important;color:#fff;font-weight:700;border:2px solid #4488ff;box-shadow:0 0 12px rgba(68,136,255,0.35)}
+.cal-day.today.has-match{background:rgba(68,136,255,0.32)!important}
+.fifa-rank{display:inline-block;font-size:9px;color:#aaaacc;background:rgba(100,100,180,0.2);padding:1px 5px;border-radius:4px;margin-left:3px;font-weight:400;vertical-align:middle;line-height:1.4}
+.today-tag{display:inline-block;font-size:10px;color:#fff;background:linear-gradient(135deg,#4488ff,#7b2fdf);font-weight:700;padding:0 5px;border-radius:8px;margin-left:2px;vertical-align:middle;line-height:1.4;box-shadow:0 0 6px rgba(68,136,255,0.4)}
+.stats-table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.stats-table th{font-size:12px;color:#aaaacc;padding:7px 6px;border-bottom:1px solid rgba(255,215,0,0.15);text-align:left;font-weight:600}
+.stats-table td{padding:7px 6px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:#ccccee}
+.stats-rank{width:30px;font-size:14px;font-weight:700;color:gold}
+.stats-player{font-weight:600}
+.stats-team{font-size:11px;color:#8888aa}
+.stat-num{font-weight:700;color:#66ffaa;text-align:center}
+.stats-gold,.stats-silver,.stats-bronze{font-weight:700;padding:2px 6px;border-radius:4px;font-size:11px}
+.stats-gold{background:linear-gradient(135deg,#ffd700,#b8860b);color:#1a1a2e}
+.stats-silver{background:linear-gradient(135deg,#c0c0c0,#808080);color:#1a1a2e}
+.stats-bronze{background:linear-gradient(135deg,#cd7f32,#8b4513);color:#1a1a2e}
+.stats-card{margin-bottom:14px}
+.stats-section-title{font-size:16px;font-weight:700;color:gold;text-align:center;margin:14px 0 10px;text-shadow:0 0 10px rgba(255,215,0,0.2)}
+".ai-rank-table{width:100%;border-collapse:collapse;margin-bottom:10px}
+.ai-rank-table th{font-size:12px;color:#aaaacc;padding:7px 5px;border-bottom:1px solid rgba(255,215,0,0.15);text-align:center;font-weight:600}
+.ai-rank-table td{padding:7px 5px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:#ccccee;text-align:center}
+.ai-rank-name{display:flex;align-items:center;gap:6px;justify-content:flex-start;font-weight:600}
+.ai-rank-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0}
+.ai-pct{font-weight:700}
+.ai-pct-low{color:#ff6666}
+.ai-pct-mid{color:#ffcc44}
+.ai-pct-high{color:#66ffaa}
+.match-ai-verdict{display:flex;justify-content:center;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.verdict-tag{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.verdict-correct{background:rgba(68,255,170,0.15);color:#66ffaa;border:1px solid rgba(68,255,170,0.3)}
+.verdict-wrong{background:rgba(255,102,102,0.15);color:#ff6666;border:1px solid rgba(255,102,102,0.3)}
+.consensus-warning{background:rgba(255,102,102,0.08);border:1px solid rgba(255,102,102,0.25);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;color:#ffaaaa;line-height:1.6}
+.consensus-warning b{color:#ff6666}
+.draw-blindspot{background:rgba(255,204,68,0.08);border:1px solid rgba(255,204,68,0.25);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;color:#ffddaa;line-height:1.6}
+.draw-blindspot b{color:#ffcc44}
+.detail-result-badge{display:inline-block;background:rgba(68,255,170,0.15);color:#66ffaa;font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600;margin-left:6px}
+.ai-verdict-detail{display:inline-block;font-size:12px;padding:2px 6px;border-radius:6px;margin-left:4px;font-weight:600}
+.ai-verdict-hit{background:rgba(68,255,170,0.15);color:#66ffaa}
+.ai-verdict-miss{background:rgba(255,102,102,0.15);color:#ff6666}
+@media(max-width:380px){
+.team-name{font-size:13px}
+.vs-box{font-size:18px;min-width:40px}
+.detail-score{font-size:36px}
+}
+
+.search-box{display:flex;gap:6px;margin-bottom:10px}
+.search-input{flex:1;padding:8px 12px;border-radius:10px;background:rgba(30,30,60,0.8);border:1px solid rgba(255,215,0,0.12);color:#e0e0f0;font-size:14px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:rgba(255,215,0,0.4)}
+.search-input::placeholder{color:#6666aa}
+.search-clear{width:36px;height:36px;border-radius:10px;background:rgba(50,50,90,0.6);border:1px solid rgba(255,215,0,0.1);color:#8888aa;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.search-clear:hover{background:rgba(255,215,0,0.15);color:gold}
+.countdown-tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600;margin-left:4px;vertical-align:middle}
+.countdown-soon{background:rgba(255,102,102,0.15);color:#ff6666;border:1px solid rgba(255,102,102,0.25)}
+.countdown-hours{background:rgba(68,136,255,0.15);color:#4488ff;border:1px solid rgba(68,136,255,0.25)}
+.countdown-days{background:rgba(100,100,180,0.15);color:#aaaacc;border:1px solid rgba(100,100,180,0.15)}
+.countdown-live{background:rgba(68,255,170,0.2);color:#66ffaa;border:1px solid rgba(68,255,170,0.3);animation:pulse-live 1.5s infinite}
+@keyframes pulse-live{0%,100%{opacity:1}50%{opacity:0.6}}
+.dashboard-card{background:rgba(30,30,60,0.85);border:1px solid rgba(255,215,0,0.1);border-radius:12px;padding:14px;margin-bottom:10px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.dashboard-item{text-align:center;padding:12px 8px;background:rgba(20,20,50,0.7);border-radius:10px;border:1px solid rgba(255,215,0,0.06)}
+.dashboard-val{font-size:22px;font-weight:800;color:gold;margin-bottom:2px}
+.dashboard-label{font-size:11px;color:#8888aa}
+.dashboard-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.dashboard-bar-label{font-size:12px;color:#aaaacc;min-width:50px;text-align:right}
+.dashboard-bar{flex:1;height:16px;background:rgba(40,40,70,0.6);border-radius:8px;overflow:hidden}
+.dashboard-bar-fill{height:100%;border-radius:8px;transition:width .6s}
+.dashboard-bar-val{font-size:11px;color:#ccccee;min-width:35px;font-weight:600}
+.continent-bar{height:16px;border-radius:8px;transition:width .6s}
+.ko-bracket{display:flex;flex-direction:column;gap:10px}
+.ko-round{background:rgba(30,30,60,0.85);border:1px solid rgba(255,215,0,0.08);border-radius:10px;padding:12px}
+.ko-round-title{font-size:14px;font-weight:700;color:gold;margin-bottom:8px;text-align:center}
+.ko-round-date{font-size:11px;color:#8888aa;text-align:center;margin-bottom:8px}
+.ko-match{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;color:#aaaacc}
+.ko-match:last-child{border-bottom:none}
+.ko-slot{font-size:12px;color:#6666aa;padding:4px 8px;border-radius:6px;background:rgba(40,40,70,0.5)}
+.ko-vs{font-size:11px;color:#8888aa;font-weight:600}
+.ko-note{text-align:center;font-size:12px;color:#8888aa;margin-top:8px;padding:10px;background:rgba(68,136,255,0.06);border-radius:8px;border:1px solid rgba(68,136,255,0.12)}
+.ko-coming{font-size:13px;color:#4488ff;font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="grid-bg"></div>
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+<div class="header">
+<h1>2026世界杯AI预言家</h1>
+<div class="sub">48队72场小组赛 · 6大AI深度分析 · 仪表盘+搜索+淘汰赛</div>
+<div id="updateTime" style="font-size:12px;color:#ddaa33;margin-top:4px;font-weight:600">&#x1F552; 数据更新：2026-06-19 15:12</div>
+</div>
+<div class="tabs">
+<div class="tab active" onclick="swTab(0)">&#x26BD;赛事</div>
+<div class="tab" onclick="swTab(1)">&#x1F916;预测</div>
+<div class="tab" onclick="swTab(2)">&#x1F4B0;赔率</div>
+<div class="tab" onclick="swTab(3)">&#x1F4CA;仪表</div>
+<div class="tab" onclick="swTab(4)">&#x1F4CB;数据</div>
+<div class="tab" onclick="swTab(5)">&#x1F3C6;淘汰</div>
+</div>
+<div id="pg0" class="page active"></div>
+<div id="pg1" class="page"></div>
+<div id="pg2" class="page"></div>
+<div id="pg3" class="page"></div>
+<div id="pg4" class="page"></div>
+<div id="pg5" class="page"></div>
+<!-- 刷新数据模态框 -->
+<div class="modal-overlay" id="refreshModal">
+<div class="modal-box">
+<div class="modal-title">&#x1F504; 数据刷新中心</div>
+<div class="modal-close" onclick="hideRefreshModal()">&#x2715;</div>
+<div class="modal-section">
+<div class="modal-label">更新类型</div>
+<div class="modal-options" id="refreshType">
+<div class="modal-opt active" data-val="all" onclick="setRefreshOpt(this,'refreshType')">全部更新</div>
+<div class="modal-opt" data-val="pred" onclick="setRefreshOpt(this,'refreshType')">仅比分预测</div>
+<div class="modal-opt" data-val="odds" onclick="setRefreshOpt(this,'refreshType')">仅赔率数据</div>
+</div>
+</div>
+<div class="modal-section">
+<div class="modal-label">更新范围</div>
+<div class="modal-options" id="refreshScope">
+<div class="modal-opt active" data-val="followed" onclick="setRefreshOpt(this,'refreshScope')">仅已关注</div>
+<div class="modal-opt" data-val="group" onclick="setRefreshOpt(this,'refreshScope')">指定分组</div>
+<div class="modal-opt" data-val="all" onclick="setRefreshOpt(this,'refreshScope')">全部比赛</div>
+</div>
+</div>
+<div class="modal-section" id="groupSelect" style="display:none">
+<div class="modal-label">选择分组</div>
+<div class="modal-options" id="refreshGroups"></div>
+</div>
+<div class="modal-section">
+<div class="modal-label">生成的提示词</div>
+<div class="modal-prompt" id="refreshPrompt">请选择更新类型和范围...</div>
+</div>
+<button class="modal-copy-btn" onclick="copyRefreshPrompt()">&#x1F4CB; 复制提示词</button>
+<div class="modal-copied" id="copiedTip">&#x2705; 已复制！粘贴发给AI助手即可</div>
+</div>
+</div>
+<script>
+var FC={"墨西哥":"mx","南非":"za","韩国":"kr","捷克":"cz","加拿大":"ca","波黑":"ba","卡塔尔":"qa","瑞士":"ch","巴西":"br","摩洛哥":"ma","海地":"ht","苏格兰":"gb-sct","美国":"us","巴拉圭":"py","澳大利亚":"au","土耳其":"tr","德国":"de","库拉索":"cw","科特迪瓦":"ci","厄瓜多尔":"ec","荷兰":"nl","日本":"jp","瑞典":"se","突尼斯":"tn","比利时":"be","埃及":"eg","伊朗":"ir","新西兰":"nz","西班牙":"es","佛得角":"cv","沙特":"sa","乌拉圭":"uy","法国":"fr","塞内加尔":"sn","伊拉克":"iq","挪威":"no","阿根廷":"ar","阿尔及利亚":"dz","奥地利":"at","约旦":"jo","葡萄牙":"pt","刚果民主共和国":"cd","乌兹别克斯坦":"uz","哥伦比亚":"co","英格兰":"gb-eng","克罗地亚":"hr","加纳":"gh","巴拿马":"pa"};
+function flagImg(name,cls){
+var c=FC[name]||"";
+var fcls=cls||"team-flag";
+var fbcls=cls?cls.replace("flag","flag-fallback"):"team-flag-fallback";
+var ch=name?name.charAt(0):"?";
+return '<img class="'+fcls+'" src="https://flagcdn.com/w80/'+c+'.png" alt="'+name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="'+fbcls+'" style="display:none">'+ch+'</div>';
+}
+var M=[
+{id:1,g:"A",t:"06-12 03:00",h:"墨西哥",a:"南非",v:"墨西哥城阿兹特克球场",r:"2-0"},
+{id:2,g:"A",t:"06-12 10:00",h:"韩国",a:"捷克",v:"瓜达拉哈拉阿克伦球场",r:"2-1"},
+{id:3,g:"A",t:"06-19 00:00",h:"捷克",a:"南非",v:"亚特兰大梅赛德斯-奔驰球场",r:"1-1"},
+{id:4,g:"A",t:"06-19 09:00",h:"墨西哥",a:"韩国",v:"瓜达拉哈拉阿克伦球场",r:"1-0"},
+{id:5,g:"A",t:"06-25 09:00",h:"捷克",a:"墨西哥",v:"墨西哥城阿兹特克球场"},
+{id:6,g:"A",t:"06-25 09:00",h:"南非",a:"韩国",v:"蒙特雷BBVA球场"},
+{id:7,g:"B",t:"06-13 03:00",h:"加拿大",a:"波黑",v:"多伦多BMO球场",r:"1-1"},
+{id:8,g:"B",t:"06-14 03:00",h:"卡塔尔",a:"瑞士",v:"旧金山李维斯球场",r:"1-1"},
+{id:9,g:"B",t:"06-19 03:00",h:"瑞士",a:"波黑",v:"洛杉矶SoFi球场",r:"4-1"},
+{id:10,g:"B",t:"06-19 06:00",h:"加拿大",a:"卡塔尔",v:"温哥华BC Place",r:"6-0"},
+{id:11,g:"B",t:"06-25 03:00",h:"瑞士",a:"加拿大",v:"温哥华BC Place"},
+{id:12,g:"B",t:"06-25 03:00",h:"波黑",a:"卡塔尔",v:"西雅图Lumen球场"},
+{id:13,g:"C",t:"06-14 09:00",h:"海地",a:"苏格兰",v:"波士顿吉列球场",r:"0-1"},
+{id:14,g:"C",t:"06-14 06:00",h:"巴西",a:"摩洛哥",v:"纽约大都会球场",r:"1-1"},
+{id:15,g:"C",t:"06-20 09:00",h:"巴西",a:"海地",v:"费城林肯金融球场"},
+{id:16,g:"C",t:"06-20 06:00",h:"苏格兰",a:"摩洛哥",v:"波士顿吉列球场"},
+{id:17,g:"C",t:"06-25 06:00",h:"苏格兰",a:"巴西",v:"迈阿密Hard Rock球场"},
+{id:18,g:"C",t:"06-25 06:00",h:"摩洛哥",a:"海地",v:"亚特兰大梅赛德斯-奔驰球场"},
+{id:19,g:"D",t:"06-13 09:00",h:"美国",a:"巴拉圭",v:"洛杉矶SoFi球场",r:"4-1"},
+{id:20,g:"D",t:"06-14 12:00",h:"澳大利亚",a:"土耳其",v:"温哥华BC Place",r:"2-0"},
+{id:21,g:"D",t:"06-20 11:00",h:"土耳其",a:"巴拉圭",v:"旧金山李维斯球场"},
+{id:22,g:"D",t:"06-20 03:00",h:"美国",a:"澳大利亚",v:"西雅图Lumen球场"},
+{id:23,g:"D",t:"06-26 10:00",h:"土耳其",a:"美国",v:"洛杉矶SoFi球场"},
+{id:24,g:"D",t:"06-26 10:00",h:"巴拉圭",a:"澳大利亚",v:"旧金山李维斯球场"},
+{id:25,g:"E",t:"06-15 07:00",h:"科特迪瓦",a:"厄瓜多尔",v:"费城林肯金融球场",r:"1-0"},
+{id:26,g:"E",t:"06-15 01:00",h:"德国",a:"库拉索",v:"休斯顿NRG球场",r:"7-1"},
+{id:27,g:"E",t:"06-21 04:00",h:"德国",a:"科特迪瓦",v:"多伦多BMO球场"},
+{id:28,g:"E",t:"06-21 08:00",h:"厄瓜多尔",a:"库拉索",v:"堪萨斯城箭头球场"},
+{id:29,g:"E",t:"06-26 04:00",h:"库拉索",a:"科特迪瓦",v:"费城林肯金融球场"},
+{id:30,g:"E",t:"06-26 04:00",h:"厄瓜多尔",a:"德国",v:"纽约大都会球场"},
+{id:31,g:"F",t:"06-15 04:00",h:"荷兰",a:"日本",v:"达拉斯AT&T球场",r:"2-2"},
+{id:32,g:"F",t:"06-15 10:00",h:"瑞典",a:"突尼斯",v:"蒙特雷BBVA球场",r:"5-1"},
+{id:33,g:"F",t:"06-21 01:00",h:"荷兰",a:"瑞典",v:"休斯顿NRG球场"},
+{id:34,g:"F",t:"06-21 12:00",h:"突尼斯",a:"日本",v:"蒙特雷BBVA球场"},
+{id:35,g:"F",t:"06-26 07:00",h:"日本",a:"瑞典",v:"达拉斯AT&T球场"},
+{id:36,g:"F",t:"06-26 07:00",h:"突尼斯",a:"荷兰",v:"堪萨斯城箭头球场"},
+{id:37,g:"G",t:"06-16 09:00",h:"伊朗",a:"新西兰",v:"洛杉矶SoFi球场",r:"2-2"},
+{id:38,g:"G",t:"06-16 03:00",h:"比利时",a:"埃及",v:"西雅图Lumen球场",r:"1-1"},
+{id:39,g:"G",t:"06-22 03:00",h:"比利时",a:"伊朗",v:"洛杉矶SoFi球场"},
+{id:40,g:"G",t:"06-22 09:00",h:"新西兰",a:"埃及",v:"温哥华BC Place"},
+{id:41,g:"G",t:"06-27 11:00",h:"埃及",a:"伊朗",v:"西雅图Lumen球场"},
+{id:42,g:"G",t:"06-27 11:00",h:"新西兰",a:"比利时",v:"温哥华BC Place"},
+{id:43,g:"H",t:"06-16 06:00",h:"沙特",a:"乌拉圭",v:"迈阿密Hard Rock球场",r:"1-1"},
+{id:44,g:"H",t:"06-16 00:00",h:"西班牙",a:"佛得角",v:"亚特兰大梅赛德斯-奔驰球场",r:"0-0"},
+{id:45,g:"H",t:"06-22 06:00",h:"乌拉圭",a:"佛得角",v:"迈阿密Hard Rock球场"},
+{id:46,g:"H",t:"06-22 00:00",h:"西班牙",a:"沙特",v:"亚特兰大梅赛德斯-奔驰球场"},
+{id:47,g:"H",t:"06-27 08:00",h:"佛得角",a:"沙特",v:"休斯顿NRG球场"},
+{id:48,g:"H",t:"06-27 08:00",h:"乌拉圭",a:"西班牙",v:"瓜达拉哈拉阿克伦球场"},
+{id:49,g:"I",t:"06-17 03:00",h:"法国",a:"塞内加尔",v:"纽约大都会球场",r:"3-1"},
+{id:50,g:"I",t:"06-17 06:00",h:"伊拉克",a:"挪威",v:"波士顿吉列球场",r:"1-4"},
+{id:51,g:"I",t:"06-23 08:00",h:"挪威",a:"塞内加尔",v:"纽约大都会球场"},
+{id:52,g:"I",t:"06-23 05:00",h:"法国",a:"伊拉克",v:"费城林肯金融球场"},
+{id:53,g:"I",t:"06-27 03:00",h:"挪威",a:"法国",v:"波士顿吉列球场"},
+{id:54,g:"I",t:"06-27 03:00",h:"塞内加尔",a:"伊拉克",v:"多伦多BMO球场"},
+{id:55,g:"J",t:"06-17 09:00",h:"阿根廷",a:"阿尔及利亚",v:"堪萨斯城箭头球场",r:"3-0"},
+{id:56,g:"J",t:"06-17 12:00",h:"奥地利",a:"约旦",v:"旧金山李维斯球场",r:"3-1"},
+{id:57,g:"J",t:"06-23 01:00",h:"阿根廷",a:"奥地利",v:"达拉斯AT&T球场"},
+{id:58,g:"J",t:"06-23 11:00",h:"约旦",a:"阿尔及利亚",v:"旧金山李维斯球场"},
+{id:59,g:"J",t:"06-28 10:00",h:"阿尔及利亚",a:"奥地利",v:"堪萨斯城箭头球场"},
+{id:60,g:"J",t:"06-28 10:00",h:"约旦",a:"阿根廷",v:"达拉斯AT&T球场"},
+{id:61,g:"K",t:"06-18 01:00",h:"葡萄牙",a:"刚果民主共和国",v:"休斯顿NRG球场",r:"1-1"},
+{id:62,g:"K",t:"06-18 09:00",h:"乌兹别克斯坦",a:"哥伦比亚",v:"墨西哥城阿兹特克球场",r:"1-3"},
+{id:63,g:"K",t:"06-24 01:00",h:"葡萄牙",a:"乌兹别克斯坦",v:"休斯顿NRG球场"},
+{id:64,g:"K",t:"06-24 09:00",h:"哥伦比亚",a:"刚果民主共和国",v:"瓜达拉哈拉阿克伦球场"},
+{id:65,g:"K",t:"06-28 07:30",h:"哥伦比亚",a:"葡萄牙",v:"迈阿密Hard Rock球场"},
+{id:66,g:"K",t:"06-28 07:30",h:"刚果民主共和国",a:"乌兹别克斯坦",v:"亚特兰大梅赛德斯-奔驰球场"},
+{id:67,g:"L",t:"06-18 07:00",h:"加纳",a:"巴拿马",v:"多伦多BMO球场",r:"1-0"},
+{id:68,g:"L",t:"06-18 04:00",h:"英格兰",a:"克罗地亚",v:"达拉斯AT&T球场",r:"4-2"},
+{id:69,g:"L",t:"06-24 04:00",h:"英格兰",a:"加纳",v:"波士顿吉列球场"},
+{id:70,g:"L",t:"06-24 07:00",h:"巴拿马",a:"克罗地亚",v:"多伦多BMO球场"},
+{id:71,g:"L",t:"06-28 05:00",h:"巴拿马",a:"英格兰",v:"纽约大都会球场"},
+{id:72,g:"L",t:"06-28 05:00",h:"克罗地亚",a:"加纳",v:"费城林肯金融球场"}
+];
+
+var PREDS={
+1:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜65%/平25%/客胜10%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜61%/平25%/客胜14%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜68%/平21%/客胜11%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜70%/平20%/客胜10%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜64%/平22%/客胜14%。"}],
+2:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜35%/平35%/客胜30%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜38%/平29%/客胜33%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜40%/平29%/客胜31%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜42%/平30%/客胜28%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜42%/平32%/客胜26%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜40%/平28%/客胜32%。"}],
+3:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜45%/平30%/客胜25%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜46%/平27%/客胜27%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜46%/平29%/客胜25%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜52%/平28%/客胜20%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜68%/平20%/客胜12%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜47%/平28%/客胜25%。"}],
+4:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜52%/平26%/客胜22%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜45%/平28%/客胜27%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜45%/平28%/客胜27%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜50%/平28%/客胜22%。"},{name:"Qwen3.7 Plus",score:"2-1",text:"Qwen3.7 Plus预测比分2-1，主胜48%/平28%/客胜24%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜47%/平27%/客胜26%。"}],
+5:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜25%/平30%/客胜45%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜27%/平29%/客胜44%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜28%/平30%/客胜42%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜24%/平28%/客胜48%。"},{name:"Qwen3.7 Plus",score:"0-1",text:"Qwen3.7 Plus预测比分0-1，主胜20%/平25%/客胜55%。"},{name:"Claude Fable 5",score:"1-2",text:"Claude Fable 5预测比分1-2，主胜26%/平28%/客胜46%。"}],
+6:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平25%/客胜60%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜22%/平29%/客胜49%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜27%/平27%/客胜46%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜20%/平28%/客胜52%。"},{name:"Qwen3.7 Plus",score:"0-1",text:"Qwen3.7 Plus预测比分0-1，主胜12%/平26%/客胜62%。"},{name:"Claude Fable 5",score:"0-1",text:"Claude Fable 5预测比分0-1，主胜22%/平26%/客胜52%。"}],
+7:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜40%/平35%/客胜25%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜43%/平31%/客胜26%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜40%/平30%/客胜30%。"},{name:"Gemini 3.5 Flash",score:"1-0",text:"Gemini 3.5 Flash预测比分1-0，主胜46%/平32%/客胜22%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜42%/平36%/客胜22%。"},{name:"Claude Fable 5",score:"1-0",text:"Claude Fable 5预测比分1-0，主胜47%/平28%/客胜25%。"}],
+8:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜5%/平15%/客胜80%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜16%/平24%/客胜60%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜13%/平22%/客胜65%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜12%/平20%/客胜68%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜5%/平10%/客胜85%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜8%/平17%/客胜75%。"}],
+9:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜55%/平25%/客胜20%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜50%/平28%/客胜22%。"},{name:"Claude Opus 4.8",score:"1-0",text:"Claude Opus 4.8预测比分1-0，主胜55%/平27%/客胜18%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜55%/平27%/客胜18%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜62%/平22%/客胜16%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜52%/平28%/客胜20%。"}],
+10:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜58%/平25%/客胜17%。"},{name:"Claude Opus 4.8",score:"1-0",text:"Claude Opus 4.8预测比分1-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜65%/平22%/客胜13%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平18%/客胜10%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜71%/平19%/客胜10%。"}],
+11:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜50%/平30%/客胜20%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜42%/平30%/客胜28%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜45%/平29%/客胜26%。"},{name:"Gemini 3.5 Flash",score:"1-0",text:"Gemini 3.5 Flash预测比分1-0，主胜46%/平31%/客胜23%。"},{name:"Qwen3.7 Plus",score:"1-0",text:"Qwen3.7 Plus预测比分1-0，主胜55%/平25%/客胜20%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜40%/平29%/客胜31%。"}],
+12:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜50%/平30%/客胜20%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜43%/平31%/客胜26%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜58%/平26%/客胜16%。"},{name:"Gemini 3.5 Flash",score:"1-0",text:"Gemini 3.5 Flash预测比分1-0，主胜48%/平30%/客胜22%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜65%/平20%/客胜15%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜57%/平26%/客胜17%。"}],
+13:[{name:"DeepSeek V4 Pro",score:"1-2",text:"DeepSeek V4 Pro预测比分1-2，主胜20%/平25%/客胜55%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜19%/平27%/客胜54%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜27%/平28%/客胜45%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜18%/平24%/客胜58%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜12%/平18%/客胜70%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜20%/平26%/客胜54%。"}],
+14:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜45%/平30%/客胜25%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜43%/平29%/客胜28%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜50%/平27%/客胜23%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜45%/平30%/客胜25%。"},{name:"Qwen3.7 Plus",score:"1-0",text:"Qwen3.7 Plus预测比分1-0，主胜45%/平30%/客胜25%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜44%/平29%/客胜27%。"}],
+15:[{name:"DeepSeek V4 Pro",score:"3-0",text:"DeepSeek V4 Pro预测比分3-0，主胜87%/平9%/客胜4%。"},{name:"GPT 5.5",score:"3-0",text:"GPT 5.5预测比分3-0，主胜86%/平9%/客胜5%。"},{name:"Claude Opus 4.8",score:"3-0",text:"Claude Opus 4.8预测比分3-0，主胜88%/平9%/客胜3%。"},{name:"Gemini 3.5 Flash",score:"4-0",text:"Gemini 3.5 Flash预测比分4-0，主胜88%/平9%/客胜3%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜85%/平10%/客胜5%。"},{name:"Claude Fable 5",score:"3-0",text:"Claude Fable 5预测比分3-0，主胜89%/平7%/客胜4%。"}],
+16:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平25%/客胜60%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜22%/平27%/客胜51%。"},{name:"Claude Opus 4.8",score:"0-1",text:"Claude Opus 4.8预测比分0-1，主胜21%/平28%/客胜51%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜20%/平28%/客胜52%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜12%/平23%/客胜65%。"},{name:"Claude Fable 5",score:"0-1",text:"Claude Fable 5预测比分0-1，主胜22%/平26%/客胜52%。"}],
+17:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平20%/客胜65%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜15%/平22%/客胜63%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜13%/平21%/客胜66%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜12%/平20%/客胜68%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜10%/平15%/客胜75%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜13%/平21%/客胜66%。"}],
+18:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜75%/平18%/客胜7%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜79%/平14%/客胜7%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜78%/平15%/客胜7%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜78%/平15%/客胜7%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜82%/平12%/客胜6%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜81%/平13%/客胜6%。"}],
+19:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜50%/平28%/客胜22%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜45%/平29%/客胜26%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜42%/平28%/客胜30%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜55%/平25%/客胜20%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜62%/平22%/客胜16%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜46%/平28%/客胜26%。"}],
+20:[{name:"DeepSeek V4 Pro",score:"0-1",text:"DeepSeek V4 Pro预测比分0-1，主胜20%/平25%/客胜55%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜30%/平27%/客胜43%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜28%/平27%/客胜45%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜26%/平29%/客胜45%。"},{name:"Qwen3.7 Plus",score:"1-2",text:"Qwen3.7 Plus预测比分1-2，主胜22%/平26%/客胜52%。"},{name:"Claude Fable 5",score:"1-2",text:"Claude Fable 5预测比分1-2，主胜25%/平27%/客胜48%。"}],
+21:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜55%/平25%/客胜20%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜43%/平29%/客胜28%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜45%/平29%/客胜26%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜50%/平30%/客胜20%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜62%/平22%/客胜16%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜46%/平28%/客胜26%。"}],
+22:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜50%/平25%/客胜25%。"},{name:"GPT 5.5",score:"2-1",text:"GPT 5.5预测比分2-1，主胜46%/平27%/客胜27%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜48%/平27%/客胜25%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜52%/平28%/客胜20%。"},{name:"Qwen3.7 Plus",score:"2-1",text:"Qwen3.7 Plus预测比分2-1，主胜55%/平25%/客胜20%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜47%/平27%/客胜26%。"}],
+23:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜40%/平30%/客胜30%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜33%/平28%/客胜39%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜42%/平27%/客胜31%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜32%/平28%/客胜40%。"},{name:"Qwen3.7 Plus",score:"2-1",text:"Qwen3.7 Plus预测比分2-1，主胜45%/平28%/客胜27%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜38%/平27%/客胜35%。"}],
+24:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜31%/平33%/客胜36%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜32%/平31%/客胜37%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜42%/平29%/客胜29%。"},{name:"Gemini 3.5 Flash",score:"1-0",text:"Gemini 3.5 Flash预测比分1-0，主胜43%/平31%/客胜26%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜28%/平38%/客胜34%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜33%/平31%/客胜36%。"}],
+25:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜30%/平40%/客胜30%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜31%/平35%/客胜34%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜36%/平31%/客胜33%。"},{name:"Gemini 3.5 Flash",score:"1-1",text:"Gemini 3.5 Flash预测比分1-1，主胜31%/平38%/客胜31%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜40%/平35%/客胜25%。"},{name:"Claude Fable 5",score:"0-1",text:"Claude Fable 5预测比分0-1，主胜28%/平31%/客胜41%。"}],
+26:[{name:"DeepSeek V4 Pro",score:"3-0",text:"DeepSeek V4 Pro预测比分3-0，主胜90%/平7%/客胜3%。"},{name:"GPT 5.5",score:"3-0",text:"GPT 5.5预测比分3-0，主胜88%/平8%/客胜4%。"},{name:"Claude Opus 4.8",score:"3-0",text:"Claude Opus 4.8预测比分3-0，主胜88%/平9%/客胜3%。"},{name:"Gemini 3.5 Flash",score:"3-0",text:"Gemini 3.5 Flash预测比分3-0，主胜90%/平8%/客胜2%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜93%/平5%/客胜2%。"},{name:"Claude Fable 5",score:"3-0",text:"Claude Fable 5预测比分3-0，主胜90%/平7%/客胜3%。"}],
+27:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜65%/平20%/客胜15%。"},{name:"GPT 5.5",score:"2-1",text:"GPT 5.5预测比分2-1，主胜57%/平23%/客胜20%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜58%/平24%/客胜18%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜56%/平24%/客胜20%。"},{name:"Qwen3.7 Plus",score:"3-1",text:"Qwen3.7 Plus预测比分3-1，主胜74%/平15%/客胜11%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜54%/平25%/客胜21%。"}],
+28:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜55%/平25%/客胜20%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜67%/平22%/客胜11%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜66%/平22%/客胜12%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜78%/平15%/客胜7%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜78%/平16%/客胜6%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜77%/平15%/客胜8%。"}],
+29:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜5%/平15%/客胜80%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜13%/平20%/客胜67%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜16%/平24%/客胜60%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜8%/平17%/客胜75%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜5%/平10%/客胜85%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜10%/平18%/客胜72%。"}],
+30:[{name:"DeepSeek V4 Pro",score:"0-1",text:"DeepSeek V4 Pro预测比分0-1，主胜15%/平25%/客胜60%。"},{name:"GPT 5.5",score:"1-2",text:"GPT 5.5预测比分1-2，主胜21%/平28%/客胜51%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜22%/平26%/客胜52%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜20%/平28%/客胜52%。"},{name:"Qwen3.7 Plus",score:"1-2",text:"Qwen3.7 Plus预测比分1-2，主胜12%/平20%/客胜68%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜21%/平28%/客胜51%。"}],
+31:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜45%/平30%/客胜25%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜47%/平27%/客胜26%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜46%/平28%/客胜26%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜48%/平28%/客胜24%。"},{name:"Qwen3.7 Plus",score:"2-1",text:"Qwen3.7 Plus预测比分2-1，主胜62%/平23%/客胜15%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜42%/平28%/客胜30%。"}],
+32:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜40%/平30%/客胜30%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜44%/平30%/客胜26%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜45%/平28%/客胜27%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜50%/平28%/客胜22%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜40%/平33%/客胜27%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜42%/平30%/客胜28%。"}],
+33:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜60%/平22%/客胜18%。"},{name:"GPT 5.5",score:"2-1",text:"GPT 5.5预测比分2-1，主胜57%/平24%/客胜19%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜58%/平24%/客胜18%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜60%/平23%/客胜17%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜68%/平19%/客胜13%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜56%/平24%/客胜20%。"}],
+34:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平28%/客胜57%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜22%/平28%/客胜50%。"},{name:"Claude Opus 4.8",score:"0-1",text:"Claude Opus 4.8预测比分0-1，主胜27%/平28%/客胜45%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜15%/平23%/客胜62%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜10%/平20%/客胜70%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜15%/平23%/客胜62%。"}],
+35:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜55%/平25%/客胜20%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜47%/平27%/客胜26%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜46%/平28%/客胜26%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜48%/平28%/客胜24%。"},{name:"Qwen3.7 Plus",score:"2-1",text:"Qwen3.7 Plus预测比分2-1，主胜62%/平22%/客胜16%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜47%/平27%/客胜26%。"}],
+36:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜5%/平12%/客胜83%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜13%/平22%/客胜65%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜13%/平24%/客胜63%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜10%/平18%/客胜72%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜8%/平17%/客胜75%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜11%/平22%/客胜67%。"}],
+37:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜73%/平18%/客胜9%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜62%/平23%/客胜15%。"},{name:"Claude Opus 4.8",score:"1-0",text:"Claude Opus 4.8预测比分1-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜68%/平20%/客胜12%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平16%/客胜12%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜61%/平24%/客胜15%。"}],
+38:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜65%/平22%/客胜13%。"},{name:"GPT 5.5",score:"2-1",text:"GPT 5.5预测比分2-1，主胜55%/平25%/客胜20%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜58%/平24%/客胜18%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平17%/客胜11%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜52%/平27%/客胜21%。"}],
+39:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜68%/平22%/客胜10%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜62%/平23%/客胜15%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜68%/平22%/客胜10%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜68%/平20%/客胜12%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平18%/客胜10%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜66%/平21%/客胜13%。"}],
+40:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平25%/客胜60%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜15%/平24%/客胜61%。"},{name:"Claude Opus 4.8",score:"0-1",text:"Claude Opus 4.8预测比分0-1，主胜16%/平26%/客胜58%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜12%/平23%/客胜65%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜12%/平22%/客胜66%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜10%/平20%/客胜70%。"}],
+41:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜30%/平40%/客胜30%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜31%/平29%/客胜40%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜35%/平30%/客胜35%。"},{name:"Gemini 3.5 Flash",score:"1-1",text:"Gemini 3.5 Flash预测比分1-1，主胜36%/平34%/客胜30%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜34%/平36%/客胜30%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜32%/平31%/客胜37%。"}],
+42:[{name:"DeepSeek V4 Pro",score:"0-3",text:"DeepSeek V4 Pro预测比分0-3，主胜5%/平10%/客胜85%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜6%/平14%/客胜80%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜6%/平15%/客胜79%。"},{name:"Gemini 3.5 Flash",score:"0-3",text:"Gemini 3.5 Flash预测比分0-3，主胜4%/平11%/客胜85%。"},{name:"Qwen3.7 Plus",score:"0-3",text:"Qwen3.7 Plus预测比分0-3，主胜5%/平10%/客胜85%。"},{name:"Claude Fable 5",score:"0-3",text:"Claude Fable 5预测比分0-3，主胜4%/平10%/客胜86%。"}],
+43:[{name:"DeepSeek V4 Pro",score:"0-1",text:"DeepSeek V4 Pro预测比分0-1，主胜10%/平25%/客胜65%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜16%/平25%/客胜59%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜13%/平24%/客胜63%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜15%/平23%/客胜62%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜10%/平15%/客胜75%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜13%/平22%/客胜65%。"}],
+44:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜82%/平14%/客胜4%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜79%/平14%/客胜7%。"},{name:"Claude Opus 4.8",score:"3-0",text:"Claude Opus 4.8预测比分3-0，主胜88%/平9%/客胜3%。"},{name:"Gemini 3.5 Flash",score:"3-0",text:"Gemini 3.5 Flash预测比分3-0，主胜82%/平13%/客胜5%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜85%/平10%/客胜5%。"},{name:"Claude Fable 5",score:"3-0",text:"Claude Fable 5预测比分3-0，主胜90%/平7%/客胜3%。"}],
+45:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜62%/平24%/客胜14%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜70%/平19%/客胜11%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜82%/平12%/客胜6%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜64%/平22%/客胜14%。"}],
+46:[{name:"DeepSeek V4 Pro",score:"3-0",text:"DeepSeek V4 Pro预测比分3-0，主胜85%/平10%/客胜5%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜79%/平15%/客胜6%。"},{name:"Claude Opus 4.8",score:"3-0",text:"Claude Opus 4.8预测比分3-0，主胜88%/平9%/客胜3%。"},{name:"Gemini 3.5 Flash",score:"3-0",text:"Gemini 3.5 Flash预测比分3-0，主胜82%/平13%/客胜5%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜85%/平10%/客胜5%。"},{name:"Claude Fable 5",score:"3-0",text:"Claude Fable 5预测比分3-0，主胜87%/平9%/客胜4%。"}],
+47:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜40%/平32%/客胜28%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜33%/平31%/客胜36%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜42%/平28%/客胜30%。"},{name:"Gemini 3.5 Flash",score:"1-1",text:"Gemini 3.5 Flash预测比分1-1，主胜28%/平34%/客胜38%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜40%/平32%/客胜28%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜32%/平30%/客胜38%。"}],
+48:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜20%/平30%/客胜50%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜22%/平29%/客胜49%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜24%/平28%/客胜48%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜20%/平28%/客胜52%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜22%/平32%/客胜46%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜17%/平25%/客胜58%。"}],
+49:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜57%/平24%/客胜19%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜58%/平24%/客胜18%。"},{name:"Gemini 3.5 Flash",score:"2-1",text:"Gemini 3.5 Flash预测比分2-1，主胜60%/平24%/客胜16%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜76%/平14%/客胜10%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜54%/平25%/客胜21%。"}],
+50:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜10%/平20%/客胜70%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜17%/平24%/客胜59%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜18%/平24%/客胜58%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜18%/平24%/客胜58%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜10%/平15%/客胜75%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜12%/平20%/客胜68%。"}],
+51:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜45%/平25%/客胜30%。"},{name:"GPT 5.5",score:"1-2",text:"GPT 5.5预测比分1-2，主胜34%/平28%/客胜38%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜40%/平28%/客胜32%。"},{name:"Gemini 3.5 Flash",score:"1-1",text:"Gemini 3.5 Flash预测比分1-1，主胜38%/平31%/客胜31%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜32%/平32%/客胜36%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜40%/平27%/客胜33%。"}],
+52:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜80%/平15%/客胜5%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜79%/平14%/客胜7%。"},{name:"Claude Opus 4.8",score:"3-0",text:"Claude Opus 4.8预测比分3-0，主胜85%/平11%/客胜4%。"},{name:"Gemini 3.5 Flash",score:"3-0",text:"Gemini 3.5 Flash预测比分3-0，主胜82%/平13%/客胜5%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜82%/平12%/客胜6%。"},{name:"Claude Fable 5",score:"3-0",text:"Claude Fable 5预测比分3-0，主胜87%/平9%/客胜4%。"}],
+53:[{name:"DeepSeek V4 Pro",score:"0-1",text:"DeepSeek V4 Pro预测比分0-1，主胜20%/平25%/客胜55%。"},{name:"GPT 5.5",score:"1-2",text:"GPT 5.5预测比分1-2，主胜22%/平24%/客胜54%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜30%/平26%/客胜44%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜22%/平26%/客胜52%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜16%/平22%/客胜62%。"},{name:"Claude Fable 5",score:"1-2",text:"Claude Fable 5预测比分1-2，主胜23%/平26%/客胜51%。"}],
+54:[{name:"DeepSeek V4 Pro",score:"2-1",text:"DeepSeek V4 Pro预测比分2-1，主胜55%/平25%/客胜20%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜58%/平25%/客胜17%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜58%/平26%/客胜16%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平18%/客胜10%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜61%/平24%/客胜15%。"}],
+55:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜61%/平24%/客胜15%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜68%/平20%/客胜12%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜75%/平15%/客胜10%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜63%/平22%/客胜15%。"}],
+56:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜78%/平14%/客胜8%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜64%/平22%/客胜14%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜62%/平24%/客胜14%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜70%/平18%/客胜12%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜80%/平13%/客胜7%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜72%/平18%/客胜10%。"}],
+57:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜65%/平20%/客胜15%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜58%/平25%/客胜17%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜66%/平22%/客胜12%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜62%/平23%/客胜15%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平16%/客胜12%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜59%/平23%/客胜18%。"}],
+58:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平25%/客胜60%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜19%/平25%/客胜56%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜21%/平27%/客胜52%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜18%/平24%/客胜58%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜8%/平22%/客胜70%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜17%/平25%/客胜58%。"}],
+59:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜32%/平30%/客胜38%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜31%/平29%/客胜40%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜37%/平29%/客胜34%。"},{name:"Gemini 3.5 Flash",score:"1-1",text:"Gemini 3.5 Flash预测比分1-1，主胜30%/平34%/客胜36%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜32%/平34%/客胜34%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜30%/平29%/客胜41%。"}],
+60:[{name:"DeepSeek V4 Pro",score:"0-3",text:"DeepSeek V4 Pro预测比分0-3，主胜8%/平17%/客胜75%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜6%/平13%/客胜81%。"},{name:"Claude Opus 4.8",score:"0-3",text:"Claude Opus 4.8预测比分0-3，主胜4%/平11%/客胜85%。"},{name:"Gemini 3.5 Flash",score:"0-3",text:"Gemini 3.5 Flash预测比分0-3，主胜4%/平11%/客胜85%。"},{name:"Qwen3.7 Plus",score:"0-3",text:"Qwen3.7 Plus预测比分0-3，主胜4%/平11%/客胜85%。"},{name:"Claude Fable 5",score:"0-3",text:"Claude Fable 5预测比分0-3，主胜4%/平10%/客胜86%。"}],
+61:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜70%/平22%/客胜8%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜67%/平22%/客胜11%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜68%/平21%/客胜11%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜74%/平17%/客胜9%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜80%/平13%/客胜7%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜73%/平17%/客胜10%。"}],
+62:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜12%/平23%/客胜65%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜18%/平27%/客胜55%。"},{name:"Claude Opus 4.8",score:"1-2",text:"Claude Opus 4.8预测比分1-2，主胜22%/平27%/客胜51%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜14%/平22%/客胜64%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜10%/平20%/客胜70%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜14%/平24%/客胜62%。"}],
+63:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜75%/平17%/客胜8%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜69%/平20%/客胜11%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜72%/平19%/客胜9%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜76%/平16%/客胜8%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜82%/平12%/客胜6%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜78%/平14%/客胜8%。"}],
+64:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜52%/平28%/客胜20%。"},{name:"Claude Opus 4.8",score:"1-0",text:"Claude Opus 4.8预测比分1-0，主胜52%/平27%/客胜21%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜72%/平18%/客胜10%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜55%/平26%/客胜19%。"}],
+65:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜28%/平32%/客胜40%。"},{name:"GPT 5.5",score:"1-2",text:"GPT 5.5预测比分1-2，主胜29%/平27%/客胜44%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜30%/平27%/客胜43%。"},{name:"Gemini 3.5 Flash",score:"1-2",text:"Gemini 3.5 Flash预测比分1-2，主胜28%/平29%/客胜43%。"},{name:"Qwen3.7 Plus",score:"1-2",text:"Qwen3.7 Plus预测比分1-2，主胜26%/平29%/客胜45%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜32%/平27%/客胜41%。"}],
+66:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜38%/平34%/客胜28%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜38%/平32%/客胜30%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜40%/平30%/客胜30%。"},{name:"Gemini 3.5 Flash",score:"1-0",text:"Gemini 3.5 Flash预测比分1-0，主胜39%/平33%/客胜28%。"},{name:"Qwen3.7 Plus",score:"1-0",text:"Qwen3.7 Plus预测比分1-0，主胜42%/平33%/客胜25%。"},{name:"Claude Fable 5",score:"1-0",text:"Claude Fable 5预测比分1-0，主胜40%/平31%/客胜29%。"}],
+67:[{name:"DeepSeek V4 Pro",score:"1-1",text:"DeepSeek V4 Pro预测比分1-1，主胜35%/平35%/客胜30%。"},{name:"GPT 5.5",score:"1-1",text:"GPT 5.5预测比分1-1，主胜31%/平30%/客胜39%。"},{name:"Claude Opus 4.8",score:"1-1",text:"Claude Opus 4.8预测比分1-1，主胜40%/平29%/客胜31%。"},{name:"Gemini 3.5 Flash",score:"1-1",text:"Gemini 3.5 Flash预测比分1-1，主胜38%/平32%/客胜30%。"},{name:"Qwen3.7 Plus",score:"1-1",text:"Qwen3.7 Plus预测比分1-1，主胜25%/平35%/客胜40%。"},{name:"Claude Fable 5",score:"1-1",text:"Claude Fable 5预测比分1-1，主胜33%/平30%/客胜37%。"}],
+68:[{name:"DeepSeek V4 Pro",score:"1-0",text:"DeepSeek V4 Pro预测比分1-0，主胜45%/平30%/客胜25%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜48%/平28%/客胜24%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜50%/平27%/客胜23%。"},{name:"Gemini 3.5 Flash",score:"1-0",text:"Gemini 3.5 Flash预测比分1-0，主胜52%/平28%/客胜20%。"},{name:"Qwen3.7 Plus",score:"2-1",text:"Qwen3.7 Plus预测比分2-1，主胜50%/平28%/客胜22%。"},{name:"Claude Fable 5",score:"2-1",text:"Claude Fable 5预测比分2-1，主胜50%/平27%/客胜23%。"}],
+69:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜75%/平17%/客胜8%。"},{name:"GPT 5.5",score:"2-0",text:"GPT 5.5预测比分2-0，主胜69%/平20%/客胜11%。"},{name:"Claude Opus 4.8",score:"2-0",text:"Claude Opus 4.8预测比分2-0，主胜74%/平17%/客胜9%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜72%/平18%/客胜10%。"},{name:"Qwen3.7 Plus",score:"3-0",text:"Qwen3.7 Plus预测比分3-0，主胜82%/平12%/客胜6%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜73%/平17%/客胜10%。"}],
+70:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜15%/平22%/客胜63%。"},{name:"GPT 5.5",score:"0-1",text:"GPT 5.5预测比分0-1，主胜16%/平24%/客胜60%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜18%/平25%/客胜57%。"},{name:"Gemini 3.5 Flash",score:"0-2",text:"Gemini 3.5 Flash预测比分0-2，主胜15%/平23%/客胜62%。"},{name:"Qwen3.7 Plus",score:"0-2",text:"Qwen3.7 Plus预测比分0-2，主胜8%/平17%/客胜75%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜15%/平23%/客胜62%。"}],
+71:[{name:"DeepSeek V4 Pro",score:"0-2",text:"DeepSeek V4 Pro预测比分0-2，主胜5%/平15%/客胜80%。"},{name:"GPT 5.5",score:"0-2",text:"GPT 5.5预测比分0-2，主胜8%/平17%/客胜75%。"},{name:"Claude Opus 4.8",score:"0-2",text:"Claude Opus 4.8预测比分0-2，主胜7%/平16%/客胜77%。"},{name:"Gemini 3.5 Flash",score:"0-3",text:"Gemini 3.5 Flash预测比分0-3，主胜6%/平14%/客胜80%。"},{name:"Qwen3.7 Plus",score:"0-3",text:"Qwen3.7 Plus预测比分0-3，主胜5%/平10%/客胜85%。"},{name:"Claude Fable 5",score:"0-2",text:"Claude Fable 5预测比分0-2，主胜5%/平11%/客胜84%。"}],
+72:[{name:"DeepSeek V4 Pro",score:"2-0",text:"DeepSeek V4 Pro预测比分2-0，主胜70%/平20%/客胜10%。"},{name:"GPT 5.5",score:"1-0",text:"GPT 5.5预测比分1-0，主胜58%/平25%/客胜17%。"},{name:"Claude Opus 4.8",score:"2-1",text:"Claude Opus 4.8预测比分2-1，主胜62%/平23%/客胜15%。"},{name:"Gemini 3.5 Flash",score:"2-0",text:"Gemini 3.5 Flash预测比分2-0，主胜60%/平25%/客胜15%。"},{name:"Qwen3.7 Plus",score:"2-0",text:"Qwen3.7 Plus预测比分2-0，主胜65%/平20%/客胜15%。"},{name:"Claude Fable 5",score:"2-0",text:"Claude Fable 5预测比分2-0，主胜58%/平24%/客胜18%。"}]
+};
+
+var ODDS={
+1:{platforms:[{name:"Bet365",win:1.42,draw:4.435,lose:8.45,handicap:"-1.5",hOdds:2.10},{name:"Coral",win:1.53,draw:4.20,lose:6.00,handicap:"-1.5",hOdds:2.15},{name:"Ladbrokes",win:1.53,draw:4.20,lose:6.00,handicap:"-1.5",hOdds:2.15},{name:"Bwin",win:1.45,draw:4.00,lose:6.50,handicap:"-1.5",hOdds:2.05},{name:"Sportingbet",win:1.50,draw:4.00,lose:5.50,handicap:"-1.0",hOdds:1.92}],avgWin:1.486,avgDraw:4.167,avgLose:6.52,impliedWin:63.8,impliedDraw:22.7,impliedLose:13.5,analysis:"【真实赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】墨西哥主胜1.42(↓)，平局4.435(↑)，南非客胜8.45(↑↑)。隐含概率：墨西哥胜63.8%，平22.7%，南非胜13.5%。赔率大幅调整！南非客胜赔率从5.50飙升至8.45，市场更加看好墨西哥。揭幕战墨西哥大胜概率增大。"},
+2:{platforms:[{name:"综合赔率",win:2.702,draw:3.08,lose:2.836,handicap:"-",hOdds:0}],avgWin:2.702,avgDraw:3.08,avgLose:2.836,impliedWin:34.1,impliedDraw:29.9,impliedLose:32.5,analysis:"【真实赔率数据 | 来源: digital-sanctuary.net | 更新: 2026-06-11】韩国主胜2.702(↑)，平局3.08(↓)，捷克客胜2.836(↑)。隐含概率：韩国胜34.1%，平29.9%，捷克胜32.5%。赔率微调，捷克稍获青睐，但仍是A组最胶着的对决。"},
+7:{platforms:[{name:"综合赔率",win:1.80,draw:3.75,lose:3.70,handicap:"-",hOdds:0}],avgWin:1.80,avgDraw:3.75,avgLose:3.70,impliedWin:50.9,impliedDraw:24.4,impliedLose:24.7,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】加拿大主胜1.80，平局3.75，波黑客胜3.70。隐含概率：加拿大胜50.9%，平24.4%，波黑胜24.7%。加拿大略占优势但波黑并非没有机会，隐含胜率50.9%。B组关键战，建议关注平局可能。"},
+8:{platforms:[{name:"综合赔率",win:7.50,draw:4.75,lose:1.36,handicap:"-",hOdds:0}],avgWin:7.50,avgDraw:4.75,avgLose:1.36,impliedWin:12.4,impliedDraw:19.5,impliedLose:68.1,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】卡塔尔主胜7.50，平局4.75，瑞士客胜1.36。隐含概率：卡塔尔胜12.4%，平19.5%，瑞士胜68.1%。瑞士客场被看好，隐含胜率68.1%。卡塔尔需利用主场因素，建议关注瑞士小胜。"},
+13:{platforms:[{name:"综合赔率",win:6.25,draw:4.75,lose:1.38,handicap:"-",hOdds:0}],avgWin:6.25,avgDraw:4.75,avgLose:1.38,impliedWin:14.6,impliedDraw:19.2,impliedLose:66.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】海地主胜6.25，平局4.75，苏格兰客胜1.38。隐含概率：海地胜14.6%，平19.2%，苏格兰胜66.2%。苏格兰客场被看好，隐含胜率66.2%。海地需利用主场因素，建议关注苏格兰小胜。"},
+14:{platforms:[{name:"综合赔率",win:1.44,draw:4.20,lose:6.00,handicap:"-",hOdds:0}],avgWin:1.44,avgDraw:4.20,avgLose:6.00,impliedWin:63.1,impliedDraw:21.7,impliedLose:15.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】巴西主胜1.44，平局4.20，摩洛哥客胜6.00。隐含概率：巴西胜63.1%，平21.7%，摩洛哥胜15.2%。巴西被明确看好，隐含胜率63.1%。但摩洛哥有一定逼平可能，建议关注巴西小胜。"},
+19:{platforms:[{name:"综合赔率",win:1.95,draw:3.40,lose:3.50,handicap:"-",hOdds:0}],avgWin:1.95,avgDraw:3.40,avgLose:3.50,impliedWin:47.0,impliedDraw:26.9,impliedLose:26.1,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】美国主胜1.95，平局3.40，巴拉圭客胜3.50。隐含概率：美国胜47.0%，平26.9%，巴拉圭胜26.1%。美国略占优势但巴拉圭并非没有机会，隐含胜率47.0%。D组关键战，建议关注平局可能。"},
+20:{platforms:[{name:"综合赔率",win:4.00,draw:3.60,lose:1.80,handicap:"-",hOdds:0}],avgWin:4.00,avgDraw:3.60,avgLose:1.80,impliedWin:23.1,impliedDraw:25.6,impliedLose:51.3,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】澳大利亚主胜4.00，平局3.60，土耳其客胜1.80。隐含概率：澳大利亚胜23.1%，平25.6%，土耳其胜51.3%。土耳其客场被看好，隐含胜率51.3%。澳大利亚需利用主场因素，建议关注土耳其小胜。"},
+25:{platforms:[{name:"综合赔率",win:3.10,draw:3.25,lose:2.15,handicap:"-",hOdds:0}],avgWin:3.10,avgDraw:3.25,avgLose:2.15,impliedWin:29.4,impliedDraw:28.1,impliedLose:42.5,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】科特迪瓦主胜3.10，平局3.25，厄瓜多尔客胜2.15。隐含概率：科特迪瓦胜29.4%，平28.1%，厄瓜多尔胜42.5%。双方势均力敌，科特迪瓦胜率29.4%，厄瓜多尔胜率42.5%，平局28.1%。E组最胶着的对决。"},
+26:{platforms:[{name:"综合赔率",win:1.02,draw:21.00,lose:41.00,handicap:"-",hOdds:0}],avgWin:1.02,avgDraw:21.00,avgLose:41.00,impliedWin:93.2,impliedDraw:4.5,impliedLose:2.3,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】德国主胜1.02，平局21.00，库拉索客胜41.00。隐含概率：德国胜93.2%，平4.5%，库拉索胜2.3%。德国胜面极大，隐含胜率93.2%，博彩市场高度一致看好。关注能否穿盘及大比分。"},
+31:{platforms:[{name:"综合赔率",win:1.80,draw:3.70,lose:3.75,handicap:"-",hOdds:0}],avgWin:1.80,avgDraw:3.70,avgLose:3.75,impliedWin:50.9,impliedDraw:24.7,impliedLose:24.4,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】荷兰主胜1.80，平局3.70，日本客胜3.75。隐含概率：荷兰胜50.9%，平24.7%，日本胜24.4%。荷兰略占优势但日本并非没有机会，隐含胜率50.9%。F组关键战，建议关注平局可能。"},
+32:{platforms:[{name:"综合赔率",win:1.85,draw:3.50,lose:3.70,handicap:"-",hOdds:0}],avgWin:1.85,avgDraw:3.50,avgLose:3.70,impliedWin:49.3,impliedDraw:26.1,impliedLose:24.6,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】瑞典主胜1.85，平局3.50，突尼斯客胜3.70。隐含概率：瑞典胜49.3%，平26.1%，突尼斯胜24.6%。瑞典略占优势但突尼斯并非没有机会，隐含胜率49.3%。F组关键战，建议关注平局可能。"},
+37:{platforms:[{name:"综合赔率",win:1.57,draw:3.80,lose:5.00,handicap:"-",hOdds:0}],avgWin:1.57,avgDraw:3.80,avgLose:5.00,impliedWin:57.9,impliedDraw:23.9,impliedLose:18.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】伊朗主胜1.57，平局3.80，新西兰客胜5.00。隐含概率：伊朗胜57.9%，平23.9%，新西兰胜18.2%。伊朗略占优势但新西兰并非没有机会，隐含胜率57.9%。G组关键战，建议关注平局可能。"},
+38:{platforms:[{name:"综合赔率",win:1.61,draw:3.80,lose:4.75,handicap:"-",hOdds:0}],avgWin:1.61,avgDraw:3.80,avgLose:4.75,impliedWin:56.8,impliedDraw:24.0,impliedLose:19.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】比利时主胜1.61，平局3.80，埃及客胜4.75。隐含概率：比利时胜56.8%，平24.0%，埃及胜19.2%。比利时略占优势但埃及并非没有机会，隐含胜率56.8%。G组关键战，建议关注平局可能。"},
+43:{platforms:[{name:"综合赔率",win:5.75,draw:4.50,lose:1.42,handicap:"-",hOdds:0}],avgWin:5.75,avgDraw:4.50,avgLose:1.42,impliedWin:15.8,impliedDraw:20.2,impliedLose:64.0,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】沙特主胜5.75，平局4.50，乌拉圭客胜1.42。隐含概率：沙特胜15.8%，平20.2%，乌拉圭胜64.0%。乌拉圭客场被看好，隐含胜率64.0%。沙特需利用主场因素，建议关注乌拉圭小胜。"},
+44:{platforms:[{name:"综合赔率",win:1.07,draw:10.00,lose:29.00,handicap:"-",hOdds:0}],avgWin:1.07,avgDraw:10.00,avgLose:29.00,impliedWin:87.4,impliedDraw:9.4,impliedLose:3.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】西班牙主胜1.07，平局10.00，佛得角客胜29.00。隐含概率：西班牙胜87.4%，平9.4%，佛得角胜3.2%。西班牙胜面极大，隐含胜率87.4%，博彩市场高度一致看好。关注能否穿盘及大比分。"},
+49:{platforms:[{name:"综合赔率",win:1.42,draw:4.50,lose:6.25,handicap:"-",hOdds:0}],avgWin:1.42,avgDraw:4.50,avgLose:6.25,impliedWin:64.8,impliedDraw:20.5,impliedLose:14.7,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】法国主胜1.42，平局4.50，塞内加尔客胜6.25。隐含概率：法国胜64.8%，平20.5%，塞内加尔胜14.7%。法国被明确看好，隐含胜率64.8%。但塞内加尔有一定逼平可能，建议关注法国小胜。"},
+50:{platforms:[{name:"综合赔率",win:8.50,draw:5.75,lose:1.22,handicap:"-",hOdds:0}],avgWin:8.50,avgDraw:5.75,avgLose:1.22,impliedWin:10.5,impliedDraw:15.7,impliedLose:73.8,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】伊拉克主胜8.50，平局5.75，挪威客胜1.22。隐含概率：伊拉克胜10.5%，平15.7%，挪威胜73.8%。挪威客场被看好，隐含胜率73.8%。伊拉克需利用主场因素，建议关注挪威小胜。"},
+55:{platforms:[{name:"综合赔率",win:1.30,draw:4.75,lose:8.00,handicap:"-",hOdds:0}],avgWin:1.30,avgDraw:4.75,avgLose:8.00,impliedWin:69.6,impliedDraw:19.1,impliedLose:11.3,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】阿根廷主胜1.30，平局4.75，阿尔及利亚客胜8.00。隐含概率：阿根廷胜69.6%，平19.1%，阿尔及利亚胜11.3%。阿根廷被明确看好，隐含胜率69.6%。但阿尔及利亚有一定逼平可能，建议关注阿根廷小胜。"},
+56:{platforms:[{name:"综合赔率",win:1.30,draw:4.75,lose:9.00,handicap:"-",hOdds:0}],avgWin:1.30,avgDraw:4.75,avgLose:9.00,impliedWin:70.5,impliedDraw:19.3,impliedLose:10.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】奥地利主胜1.30，平局4.75，约旦客胜9.00。隐含概率：奥地利胜70.5%，平19.3%，约旦胜10.2%。奥地利被明确看好，隐含胜率70.5%。但约旦有一定逼平可能，建议关注奥地利小胜。"},
+61:{platforms:[{name:"综合赔率",win:1.27,draw:5.00,lose:10.00,handicap:"-",hOdds:0}],avgWin:1.27,avgDraw:5.00,avgLose:10.00,impliedWin:72.4,impliedDraw:18.4,impliedLose:9.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】葡萄牙主胜1.27，平局5.00，刚果民主共和国客胜10.00。隐含概率：葡萄牙胜72.4%，平18.4%，刚果民主共和国胜9.2%。葡萄牙被明确看好，隐含胜率72.4%。但刚果民主共和国有一定逼平可能，建议关注葡萄牙小胜。"},
+62:{platforms:[{name:"综合赔率",win:6.50,draw:4.50,lose:1.38,handicap:"-",hOdds:0}],avgWin:6.50,avgDraw:4.50,avgLose:1.38,impliedWin:14.0,impliedDraw:20.2,impliedLose:65.8,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】乌兹别克斯坦主胜6.50，平局4.50，哥伦比亚客胜1.38。隐含概率：乌兹别克斯坦胜14.0%，平20.2%，哥伦比亚胜65.8%。哥伦比亚客场被看好，隐含胜率65.8%。乌兹别克斯坦需利用主场因素，建议关注哥伦比亚小胜。"},
+67:{platforms:[{name:"综合赔率",win:1.80,draw:3.50,lose:3.90,handicap:"-",hOdds:0}],avgWin:1.80,avgDraw:3.50,avgLose:3.90,impliedWin:50.6,impliedDraw:26.0,impliedLose:23.4,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】加纳主胜1.80，平局3.50，巴拿马客胜3.90。隐含概率：加纳胜50.6%，平26.0%，巴拿马胜23.4%。加纳略占优势但巴拿马并非没有机会，隐含胜率50.6%。L组关键战，建议关注平局可能。"},
+68:{platforms:[{name:"综合赔率",win:1.57,draw:4.00,lose:4.75,handicap:"-",hOdds:0}],avgWin:1.57,avgDraw:4.00,avgLose:4.75,impliedWin:58.0,impliedDraw:22.8,impliedLose:19.2,analysis:"【真实AI预测+赔率数据 | 来源: digital-sanctuary.net/worldcup-odds.com | 更新: 2026-06-11】英格兰主胜1.57，平局4.00，克罗地亚客胜4.75。隐含概率：英格兰胜58.0%，平22.8%，克罗地亚胜19.2%。英格兰略占优势但克罗地亚并非没有机会，隐含胜率58.0%。L组关键战，建议关注平局可能。"}
+};
+
+
+var ODDS_SOURCE="赔率数据来源：digital-sanctuary.net + worldcup-odds.com | 更新时间：2026-06-11 | 注：仅24场已开盘比赛有真实赔率，其余比赛赔率将在赛前开盘后更新";
+
+var AI_NAMES=["DeepSeek V4 Pro","GPT 5.5","Claude Opus 4.8","Gemini 3.5 Flash","Qwen3.7 Plus","Claude Fable 5"];
+var AI_COLORS=["#4488ff","#10a37f","#cc6644","#4285f4","#ff6a00","#9b59b6"];
+var AI_EMOJI=["&#x1F52E;","&#x1F4A1;","&#x1F3AF;","&#x1F48E;","&#x26A1;","&#x1F300;"];
+
+
+var FIFA_RANK={"阿根廷":1,"法国":2,"西班牙":3,"英格兰":4,"巴西":5,"葡萄牙":6,"比利时":7,"荷兰":8,"哥伦比亚":9,"克罗地亚":10,"乌拉圭":11,"摩洛哥":12,"意大利":13,"德国":14,"日本":15,"墨西哥":16,"美国":17,"塞内加尔":18,"伊朗":19,"瑞士":20,"丹麦":21,"韩国":22,"奥地利":23,"瑞典":24,"挪威":25,"突尼斯":26,"威尔士":27,"波兰":28,"埃及":29,"喀麦隆":30,"尼日利亚":31,"阿尔及利亚":32,"牙买加":33,"加纳":34,"沙特":35,"加拿大":36,"塞尔维亚":37,"苏格兰":38,"捷克":39,"哥斯达黎加":40,"澳大利亚":41,"卡塔尔":42,"厄瓜多尔":43,"约旦":44,"伊拉克":45,"南非":46,"海地":47,"巴拿马":48,"新西兰":49,"佛得角":50,"刚果民主共和国":51,"科特迪瓦":52,"库拉索":53,"安哥拉":54,"巴拉圭":55,"波黑":56,"乌兹别克斯坦":57,"秘鲁":58};
+var CONTINENT={"墨西哥":"北美洲","加拿大":"北美洲","美国":"北美洲","巴拿马":"北美洲","海地":"北美洲","哥斯达黎加":"北美洲","南非":"非洲","摩洛哥":"非洲","科特迪瓦":"非洲","加纳":"非洲","塞内加尔":"非洲","埃及":"非洲","喀麦隆":"非洲","尼日利亚":"非洲","阿尔及利亚":"非洲","突尼斯":"非洲","刚果民主共和国":"非洲","佛得角":"非洲","韩国":"亚洲","日本":"亚洲","伊朗":"亚洲","沙特":"亚洲","卡塔尔":"亚洲","伊拉克":"亚洲","乌兹别克斯坦":"亚洲","约旦":"亚洲","澳大利亚":"大洋洲","新西兰":"大洋洲","巴西":"南美洲","阿根廷":"南美洲","哥伦比亚":"南美洲","乌拉圭":"南美洲","厄瓜多尔":"南美洲","巴拉圭":"南美洲","秘鲁":"南美洲","智利":"南美洲","捷克":"欧洲","波黑":"欧洲","瑞士":"欧洲","苏格兰":"欧洲","土耳其":"欧洲","德国":"欧洲","荷兰":"欧洲","瑞典":"欧洲","挪威":"欧洲","比利时":"欧洲","法国":"欧洲","西班牙":"欧洲","葡萄牙":"欧洲","克罗地亚":"欧洲","奥地利":"欧洲","英格兰":"欧洲","威尔士":"欧洲","丹麦":"欧洲","库拉索":"北美洲","塞尔维亚":"欧洲"};
+var CONT_COLOR={"北美洲":"#4488ff","南美洲":"#66ffaa","欧洲":"#ffcc44","亚洲":"#ff6a00","非洲":"#cc6644","大洋洲":"#9b59b6","其他":"#8888aa"};
+var curTab=0,curDetail=-1,curGroup="全部",curDate="全部",curMonth="全部",searchQuery="";
+var FOLLOWED=[];
+try{FOLLOWED=JSON.parse(localStorage.getItem("wc_followed")||"[]");}catch(e){}
+
+function saveFollowed(){try{localStorage.setItem("wc_followed",JSON.stringify(FOLLOWED));}catch(e){}}
+function isFollowed(id){return FOLLOWED.indexOf(id)>=0;}
+function toggleFollow(id,ev){
+if(ev)ev.stopPropagation();
+var idx=FOLLOWED.indexOf(id);
+if(idx>=0){FOLLOWED.splice(idx,1);}else{FOLLOWED.push(id);}
+saveFollowed();
+if(curTab===0)renderMatches();
+if(curTab===1)renderFollowed();
+if(curTab===2)renderOddsPage();
+updateFab();
+}
+function updateFab(){
+var fb=document.getElementById("fab");
+if(!fb)return;
+var c=FOLLOWED.length;
+fb.innerHTML=c>0?'<span style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">&#x1F4CB;<span class="fab-count">'+c+'</span></span>':'&#x1F4CB;';
+}
+
+function swTab(i){
+document.querySelectorAll(".tab")[curTab].classList.remove("active");
+document.getElementById("pg"+curTab).classList.remove("active");
+curTab=i;
+document.querySelectorAll(".tab")[i].classList.add("active");
+document.getElementById("pg"+i).classList.add("active");
+if(i===0)renderMatches();
+if(i===1)renderFollowed();
+if(i===2)renderOddsPage();
+if(i===3)renderDashboard();
+if(i===4)renderStats();
+if(i===5)renderKnockout();
+}
+
+
+var SCORERS=[
+{r:1,p:"巴洛贡",t:"美国",g:2,m:1},
+{r:1,p:"哈弗茨",t:"德国",g:2,m:1},
+{r:3,p:"金特罗",t:"墨西哥",g:1,m:1},
+{r:3,p:"希门尼斯",t:"墨西哥",g:1,m:1},
+{r:3,p:"克雷伊奇",t:"捷克",g:1,m:1},
+{r:3,p:"黄仁范",t:"韩国",g:1,m:1},
+{r:3,p:"吴贤揆",t:"韩国",g:1,m:1},
+{r:3,p:"卢基奇",t:"波黑",g:1,m:1},
+{r:3,p:"拉林",t:"加拿大",g:1,m:1},
+{r:3,p:"毛里西奥",t:"巴拉圭",g:1,m:1},
+{r:3,p:"雷纳",t:"美国",g:1,m:1},
+{r:3,p:"恩博洛",t:"瑞士",g:1,m:1},
+{r:3,p:"霍赫基",t:"卡塔尔",g:1,m:1},
+{r:3,p:"萨伊巴里",t:"摩洛哥",g:1,m:1},
+{r:3,p:"维尼修斯",t:"巴西",g:1,m:1},
+{r:3,p:"麦金",t:"苏格兰",g:1,m:1},
+{r:3,p:"伊兰昆达",t:"澳大利亚",g:1,m:1},
+{r:3,p:"梅特卡尔夫",t:"澳大利亚",g:1,m:1},
+{r:3,p:"恩梅查",t:"德国",g:1,m:1},
+{r:3,p:"施洛特贝克",t:"德国",g:1,m:1},
+{r:3,p:"科梅嫩西亚",t:"库拉索",g:1,m:1},
+{r:3,p:"穆西亚拉",t:"德国",g:1,m:1},
+{r:3,p:"布朗",t:"德国",g:1,m:1},
+{r:3,p:"翁达夫",t:"德国",g:1,m:1},
+{r:3,p:"范戴克",t:"荷兰",g:1,m:1},
+{r:3,p:"萨默维尔",t:"荷兰",g:1,m:1},
+{r:3,p:"中村敬斗",t:"日本",g:1,m:1},
+{r:3,p:"镰田大地",t:"日本",g:1,m:1},
+{r:3,p:"迪亚洛",t:"科特迪瓦",g:1,m:1},
+{r:3,p:"阿亚里",t:"瑞典",g:2,m:1},
+{r:3,p:"伊萨克",t:"瑞典",g:1,m:1},
+{r:3,p:"约克雷斯",t:"瑞典",g:1,m:1},
+{r:3,p:"斯万贝里",t:"瑞典",g:1,m:1},
+{r:3,p:"雷基克",t:"突尼斯",g:1,m:1},
+{r:3,p:"阿舒尔",t:"埃及",g:1,m:1},
+{r:3,p:"阿姆里",t:"沙特",g:1,m:1},
+{r:3,p:"阿劳霍",t:"乌拉圭",g:1,m:1},
+{r:3,p:"贾斯特",t:"新西兰",g:2,m:1},
+{r:3,p:"雷扎伊扬",t:"伊朗",g:1,m:1},
+{r:3,p:"莫赫比",t:"伊朗",g:1,m:1},
+{r:5,p:"姆巴佩",t:"法国",g:2,m:1},
+{r:5,p:"巴尔科拉",t:"法国",g:1,m:1},
+{r:5,p:"姆巴耶",t:"塞内加尔",g:1,m:1},
+{r:5,p:"哈兰德",t:"挪威",g:2,m:1},
+{r:5,p:"厄斯蒂高",t:"挪威",g:1,m:1},
+{r:5,p:"索尔茨维特",t:"挪威",g:1,m:1},
+{r:5,p:"侯赛因",t:"伊拉克",g:1,m:1},
+{r:3,p:"梅西",t:"阿根廷",g:3,m:1},
+{r:3,p:"施密德",t:"奥地利",g:1,m:1},
+{r:3,p:"奥尔万",t:"约旦",g:1,m:1},
+{r:3,p:"阿拉布",t:"约旦",g:-1,m:1},
+{r:3,p:"阿瑙托维奇",t:"奥地利",g:1,m:1},
+{r:3,p:"内维斯",t:"葡萄牙",g:1,m:1},
+{r:3,p:"维萨",t:"刚果民主共和国",g:1,m:1},
+{r:3,p:"凯恩",t:"英格兰",g:2,m:1},
+{r:3,p:"巴图里纳",t:"克罗地亚",g:1,m:1},
+{r:3,p:"穆萨",t:"克罗地亚",g:1,m:1},
+{r:3,p:"贝林厄姆",t:"英格兰",g:1,m:1},
+{r:3,p:"拉什福德",t:"英格兰",g:1,m:1},
+{r:3,p:"穆尼奥斯",t:"哥伦比亚",g:1,m:1},
+{r:3,p:"路易斯·迪亚斯",t:"哥伦比亚",g:1,m:1},
+{r:3,p:"坎帕斯",t:"哥伦比亚",g:1,m:1},
+{r:3,p:"法伊祖拉耶夫",t:"乌兹别克斯坦",g:1,m:1},
+{r:3,p:"伊伦基",t:"加纳",g:1,m:1},
+{r:1,p:"乔纳森·大卫",t:"加拿大",g:3,m:2},
+{r:3,p:"约翰·曼赞比",t:"瑞士",g:2,m:2},
+{r:3,p:"赛尔·拉林",t:"加拿大",g:1,m:2},
+{r:3,p:"内森·萨利巴",t:"加拿大",g:1,m:2},
+{r:3,p:"鲁本·瓦尔加斯",t:"瑞士",g:1,m:2},
+{r:3,p:"格拉尼特·扎卡",t:"瑞士",g:1,m:2},
+{r:3,p:"厄尔明·马米奇",t:"波黑",g:1,m:2},
+{r:3,p:"路易斯·罗莫",t:"墨西哥",g:1,m:2},
+{r:3,p:"米哈尔·萨迪莱克",t:"捷克",g:1,m:2},
+{r:3,p:"特博霍·莫科埃纳",t:"南非",g:1,m:2}
+]
+var ASSISTS=[
+{r:1,p:"翁达夫",t:"德国",a:2,m:1},
+{r:1,p:"基米希",t:"德国",a:2,m:1},
+{r:1,p:"格拉芬贝赫",t:"荷兰",a:2,m:1},
+{r:4,p:"弗里曼",t:"美国",a:1,m:1},
+{r:4,p:"卜拉欣·迪亚斯",t:"摩洛哥",a:1,m:1},
+{r:4,p:"吉马良斯",t:"巴西",a:1,m:1},
+{r:4,p:"普利西奇",t:"美国",a:1,m:1},
+{r:4,p:"黄仁范",t:"韩国",a:1,m:1},
+{r:4,p:"布朗",t:"德国",a:1,m:1},
+{r:4,p:"伊萨克",t:"瑞典",a:2,m:1},
+{r:4,p:"约克雷斯",t:"瑞典",a:1,m:1},
+{r:11,p:"萨拉赫",t:"埃及",a:1,m:1},
+{r:11,p:"卡努",t:"沙特",a:1,m:1},
+{r:1,p:"伍德",t:"新西兰",a:2,m:1},
+{r:5,p:"奥利塞",t:"法国",a:1,m:1},
+{r:5,p:"拉比奥",t:"法国",a:1,m:1},
+{r:5,p:"厄德高",t:"挪威",a:1,m:1},
+{r:5,p:"哈兰德",t:"挪威",a:1,m:1},
+{r:4,p:"赖斯",t:"英格兰",a:1,m:1},
+{r:4,p:"佩里西奇",t:"克罗地亚",a:1,m:1},
+{r:4,p:"萨卡",t:"英格兰",a:1,m:1},
+{r:4,p:"路易斯·迪亚斯",t:"哥伦比亚",a:1,m:1},
+{r:4,p:"普埃尔塔",t:"哥伦比亚",a:1,m:1},
+{r:4,p:"库乔·埃尔南德斯",t:"哥伦比亚",a:1,m:1},
+{r:4,p:"托马斯-阿桑特",t:"加纳",a:1,m:1}
+]
+
+function renderStats(){
+var c=document.getElementById("pg4");
+var h="";
+h+='<div class="stats-section-title">&#x1F3C6; 射手榜</div>';
+h+='<div class="card stats-card">';
+h+='<table class="stats-table"><tr><th>#</th><th>球员</th><th>球队</th><th style="text-align:center">进球</th><th style="text-align:center">场次</th></tr>';
+SCORERS.slice().sort(function(a,b){return b.g-a.g||a.m-b.m;}).slice(0,10).forEach(function(s,i){
+var medal=i===0?'<span class="stats-gold">🥇</span>':i===1?'<span class="stats-silver">🥈</span>':i===2?'<span class="stats-bronze">🥉</span>':'';
+h+="<tr><td><span class=\"stats-rank\">"+(medal?medal:(i+1))+"</span></td><td><span class=\"stats-player\">"+s.p+"</span></td><td><span class=\"stats-team\">"+s.t+"</span></td><td class=\"stat-num\">"+s.g+"</td><td class=\"stat-num\" style=\"color:#ccccee\">"+s.m+"</td></tr>";
+});
+h+="</table></div>";
+
+h+='<div class="stats-section-title">&#x270F;&#xFE0F; 助攻榜</div>';
+h+='<div class="card stats-card">';
+h+='<table class="stats-table"><tr><th>#</th><th>球员</th><th>球队</th><th style="text-align:center">助攻</th><th style="text-align:center">场次</th></tr>';
+ASSISTS.slice().sort(function(a,b){return b.a-a.a||a.m-b.m;}).slice(0,10).forEach(function(s,i){
+var medal=i===0?'<span class="stats-gold">🥇</span>':i===1?'<span class="stats-silver">🥈</span>':i===2?'<span class="stats-bronze">🥉</span>':'';
+h+="<tr><td><span class=\"stats-rank\">"+(medal?medal:(i+1))+"</span></td><td><span class=\"stats-player\">"+s.p+"</span></td><td><span class=\"stats-team\">"+s.t+"</span></td><td class=\"stat-num\">"+s.a+"</td><td class=\"stat-num\" style=\"color:#ccccee\">"+s.m+"</td></tr>";
+});
+h+="</table></div>";
+
+// 积分榜
+var groups=["A","B","C","D","E","F","G","H","I","J","K","L"];
+var gd={};
+groups.forEach(function(g){gd[g]=[];});
+var teamData={};
+M.forEach(function(m){
+if(!teamData[m.h]){teamData[m.h]={g:m.g,p:0,w:0,d:0,l:0,gf:0,ga:0};}
+if(!teamData[m.a]){teamData[m.a]={g:m.g,p:0,w:0,d:0,l:0,gf:0,ga:0};}
+if(m.r){
+var s=m.r.split("-");var hg=parseInt(s[0]),ag=parseInt(s[1]);
+var ht=teamData[m.h],at=teamData[m.a];
+ht.gf+=hg;ht.ga+=ag;at.gf+=ag;at.ga+=hg;
+if(hg>ag){ht.w++;ht.p+=3;at.l++;}
+else if(hg<ag){at.w++;at.p+=3;ht.l++;}
+else{ht.d++;ht.p+=1;at.d++;at.p+=1;}
+}
+});
+Object.keys(teamData).forEach(function(t){var tm=teamData[t];gd[tm.g].push({name:t,p:tm.p,w:tm.w,d:tm.d,l:tm.l,gf:tm.gf,ga:tm.ga,gd:tm.gf-tm.ga});});
+h+='<div class="stats-section-title">&#x1F3C6; 积分榜</div>';
+groups.forEach(function(g){
+var t=gd[g];t.sort(function(a,b){return b.p-a.p||b.gd-a.gd||b.gf-a.gf;});
+h+='<div class="card" style="margin-bottom:10px">';
+h+='<div style="font-size:14px;font-weight:700;color:gold;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(255,215,0,0.15)">'+g+'组</div>';
+h+='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+h+='<tr style="color:#8888aa;border-bottom:1px solid rgba(255,255,255,0.06)"><td style="padding:3px 1px;text-align:center;width:18px">#</td><td style="padding:3px 2px;text-align:left">球队</td><td style="padding:3px 1px;text-align:center">场</td><td style="padding:3px 1px;text-align:center">胜</td><td style="padding:3px 1px;text-align:center">平</td><td style="padding:3px 1px;text-align:center">负</td><td style="padding:3px 1px;text-align:center">进</td><td style="padding:3px 1px;text-align:center">失</td><td style="padding:3px 1px;text-align:center">净</td><td style="padding:3px 1px;text-align:center;font-weight:700">分</td></tr>';
+t.forEach(function(tm,i){
+var played=tm.w+tm.d+tm.l;
+var bg=i<2?"rgba(255,215,0,0.06)":"transparent";
+var fc=i<2?"#e0e0f0":"#aaaacc";
+h+='<tr style="background:'+bg+';color:'+fc+';border-bottom:1px solid rgba(255,255,255,0.03)">';
+h+='<td style="padding:4px 1px;text-align:center;font-weight:'+(i<2?'700':'400')+'">'+(i+1)+'</td>';
+h+='<td style="padding:4px 2px;text-align:left;white-space:nowrap">'+(i<2?'&#x2B50; ':'')+tm.name+'</td>';
+h+='<td style="padding:4px 1px;text-align:center">'+played+'</td>';
+h+='<td style="padding:4px 1px;text-align:center;color:#66ffaa">'+tm.w+'</td>';
+h+='<td style="padding:4px 1px;text-align:center;color:#ffcc44">'+tm.d+'</td>';
+h+='<td style="padding:4px 1px;text-align:center;color:#ff6666">'+tm.l+'</td>';
+h+='<td style="padding:4px 1px;text-align:center">'+tm.gf+'</td>';
+h+='<td style="padding:4px 1px;text-align:center">'+tm.ga+'</td>';
+h+='<td style="padding:4px 1px;text-align:center;color:'+(tm.gd>0?'#66ffaa':tm.gd<0?'#ff6666':'#ccccee')+'">'+(tm.gd>0?'+':'')+tm.gd+'</td>';
+h+='<td style="padding:4px 1px;text-align:center;font-weight:700;color:gold">'+tm.p+'</td>';
+h+='</tr>';
+});
+h+='</table></div>';
+});
+h+='<div style="text-align:center;font-size:10px;color:#6666aa;margin-top:6px">&#x2B50; 前2名直接晋级 | 成绩最好的8个小组第3名也可晋级32强</div>';
+
+h+='<div style="text-align:center;font-size:11px;color:#6666aa;margin-top:10px;padding-bottom:20px">数据来源：2026世界杯小组赛已完赛比赛 | 随赛果更新</div>';
+
+c.innerHTML=h;
+}
+
+function renderDashboard(){
+var c=document.getElementById("pg3");
+var h="";
+
+// AI翻车榜
+h+='<div class="stats-section-title">&#x1F4C9; AI翻车榜</div>';
+h+='<div class="card stats-card">';
+var completed=M.filter(function(m2){return m2.r;});
+if(completed.length===0){
+h+='<div style="text-align:center;padding:20px;color:#8888aa;font-size:13px">&#x23F3; 暂无已完赛数据，AI准确率将在赛后自动计算</div>';
+}else{
+var aiStats=[];
+AI_NAMES.forEach(function(nm,idx){
+var dirHit=0,exactHit=0,total=0;
+completed.forEach(function(m2){
+var preds2=PREDS[m2.id];
+if(!preds2)return;
+var p2=preds2[idx];
+if(!p2)return;
+total++;
+var ps2=p2.score.split("-");var ph2=parseInt(ps2[0]),pa2=parseInt(ps2[1]);
+var rs2=m2.r.split("-");var rh2=parseInt(rs2[0]),ra2=parseInt(rs2[1]);
+var pDir=ph2>pa2?'W':ph2===pa2?'D':'L';
+var rDir=rh2>ra2?'W':rh2===ra2?'D':'L';
+if(pDir===rDir)dirHit++;
+if(ph2===rh2&&pa2===ra2)exactHit++;
+});
+aiStats.push({name:nm,idx:idx,dirRate:total>0?(dirHit/total*100):0,exactRate:total>0?(exactHit/total*100):0,dirHit:dirHit,exactHit:exactHit,total:total});
+});
+aiStats.sort(function(a,b){return a.dirRate-b.dirRate||a.exactRate-b.exactRate;});
+h+='<table class="ai-rank-table"><tr><th style="width:30px">#</th><th style="text-align:left">AI模型</th><th>方向命中</th><th>精确比分</th><th>已评</th></tr>';
+aiStats.forEach(function(s,i){
+var dirCls=s.dirRate<30?'ai-pct ai-pct-low':s.dirRate<50?'ai-pct ai-pct-mid':'ai-pct ai-pct-high';
+var exCls=s.exactRate<10?'ai-pct ai-pct-low':s.exactRate<20?'ai-pct ai-pct-mid':'ai-pct ai-pct-high';
+var medal=i===0?'<span style="font-size:13px">&#x1F4A9;</span>':i===1?'<span style="font-size:13px">&#x1F4A5;</span>':i===2?'<span style="font-size:13px">&#x1F4C9;</span>':'';
+h+='<tr><td>'+(medal||(i+1))+'</td><td style="text-align:left"><div class="ai-rank-name"><div class="ai-rank-avatar" style="background:'+AI_COLORS[s.idx]+'">'+AI_EMOJI[s.idx]+'</div>'+s.name+'</div></td><td class="'+dirCls+'">'+s.dirRate.toFixed(0)+'%<div style="font-size:10px;color:#8888aa;font-weight:400">'+s.dirHit+'/'+s.total+'</div></td><td class="'+exCls+'">'+s.exactRate.toFixed(0)+'%<div style="font-size:10px;color:#8888aa;font-weight:400">'+s.exactHit+'/'+s.total+'</div></td><td style="color:#8888aa">'+s.total+'</td></tr>';
+});
+h+='</table>';
+// Summary
+var totalDraws=completed.filter(function(m2){var rs2=m2.r.split("-");return parseInt(rs2[0])===parseInt(rs2[1]);}).length;
+var totalMatches=completed.length;
+var drawRate=(totalDraws/totalMatches*100).toFixed(0);
+var aiDrawPreds=0;var aiTotalPreds=0;
+completed.forEach(function(m2){var preds2=PREDS[m2.id];if(!preds2)return;preds2.forEach(function(p2){aiTotalPreds++;var ps2=p2.score.split("-");if(parseInt(ps2[0])===parseInt(ps2[1]))aiDrawPreds++;});});
+var aiDrawRate=aiTotalPreds>0?(aiDrawPreds/aiTotalPreds*100).toFixed(1):0;
+h+='<div style="padding:8px 4px;font-size:12px;color:#aaaacc;line-height:1.7;border-top:1px solid rgba(255,215,0,0.08);margin-top:6px">';
+h+='&#x1F4CA; 已完赛 <b style="color:#e0e0f0">'+totalMatches+'</b> 场中 <b style="color:#ffcc44">'+totalDraws+'</b> 场平局('+drawRate+'%)，而AI预测平局率仅 <b style="color:#ff6666">'+aiDrawRate+'%</b><br>';
+h+='<span style="color:#ff6666">&#x26A0;&#xFE0F; AI系统性低估平局概率！赔率中平局隐含概率>25%的比赛值得特别关注</span>';
+h+='</div>';
+}
+h+='</div>';
+
+
+// 赛果仪表盘（增强版）
+var completed2=M.filter(function(m2){return m2.r;});
+if(completed2.length>0){
+h+='<div class="stats-section-title">&#x1F4CA; 赛果仪表盘</div>';
+h+='<div class="dashboard-card">';
+h+='<div class="dashboard-grid">';
+h+='<div class="dashboard-item"><div class="dashboard-val">'+completed2.length+'/72</div><div class="dashboard-label">已完赛</div></div>';
+var draws2=completed2.filter(function(m2){var rs=m2.r.split("-");return parseInt(rs[0])===parseInt(rs[1]);}).length;
+var drawRate2=(draws2/completed2.length*100).toFixed(1);
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#ffcc44">'+drawRate2+'%</div><div class="dashboard-label">平局率 ('+draws2+'场)</div></div>';
+var totalGoals=0;
+completed2.forEach(function(m2){var rs=m2.r.split("-");totalGoals+=parseInt(rs[0])+parseInt(rs[1]);});
+var avgGoals=(totalGoals/completed2.length).toFixed(1);
+h+='<div class="dashboard-item"><div class="dashboard-val">'+avgGoals+'</div><div class="dashboard-label">场均进球</div></div>';
+var biggestWin='';
+var biggestDiff=0;
+completed2.forEach(function(m2){var rs=m2.r.split("-");var d=Math.abs(parseInt(rs[0])-parseInt(rs[1]));if(d>biggestDiff){biggestDiff=d;biggestWin=m2.h+' '+m2.r+' '+m2.a;}});
+h+='<div class="dashboard-item"><div class="dashboard-val" style="font-size:14px">'+(biggestWin||'-')+'</div><div class="dashboard-label">最大分差 ('+biggestDiff+'球)</div></div>';
+h+='</div>';
+// 爆冷率+零封率+大比分率
+var upsetCount=0;
+completed2.forEach(function(m2){var rh=FIFA_RANK[m2.h]||99,ra=FIFA_RANK[m2.a]||99;var rs=m2.r.split("-");var hg=parseInt(rs[0]),ag=parseInt(rs[1]);if(hg>ag&&ra<rh&&(rh-ra)>15)upsetCount++;if(ag>hg&&rh<ra&&(ra-rh)>15)upsetCount++;});
+var upsetRate=(upsetCount/completed2.length*100).toFixed(1);
+var cleanSheet=0;
+completed2.forEach(function(m2){var rs=m2.r.split("-");if(parseInt(rs[0])===0||parseInt(rs[1])===0)cleanSheet++;});
+var csRate=(cleanSheet/completed2.length*100).toFixed(1);
+var bigScore=0;
+completed2.forEach(function(m2){var rs=m2.r.split("-");if(Math.abs(parseInt(rs[0])-parseInt(rs[1]))>=3)bigScore++;});
+var bigRate=(bigScore/completed2.length*100).toFixed(1);
+h+='<div class="dashboard-grid" style="margin-top:8px">';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#ff6666">'+upsetRate+'%</div><div class="dashboard-label">&#x1F525; 爆冷率 ('+upsetCount+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#4488ff">'+csRate+'%</div><div class="dashboard-label">&#x1F9F9; 零封率 ('+cleanSheet+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#66ffaa">'+bigRate+'%</div><div class="dashboard-label">&#x1F4A5; 大比分率 ('+bigScore+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#ffaa00">'+totalGoals+'</div><div class="dashboard-label">&#x1F3AF; 总进球</div></div>';
+h+='</div>';
+// 大洲胜率
+var continentStats={};
+completed2.forEach(function(m2){var hc=CONTINENT[m2.h]||'其他';var ac=CONTINENT[m2.a]||'其他';var rs=m2.r.split("-");var rh=parseInt(rs[0]),ra=parseInt(rs[1]);if(!continentStats[hc])continentStats[hc]={wins:0,total:0};continentStats[hc].total++;if(rh>ra)continentStats[hc].wins++;if(!continentStats[ac])continentStats[ac]={total:0,wins:0};continentStats[ac].total++;if(ra>rh)continentStats[ac].wins++;});
+var contArr=[];
+Object.keys(continentStats).forEach(function(c2){contArr.push({name:c2,wins:continentStats[c2].wins,total:continentStats[c2].total,rate:continentStats[c2].wins/continentStats[c2].total*100});});
+contArr.sort(function(a,b){return b.rate-a.rate;});
+h+='<div style="font-size:13px;font-weight:600;color:#aaaacc;margin-bottom:8px">&#x1F30D; 大洲胜率</div>';
+contArr.forEach(function(ct2){var col=CONT_COLOR[ct2.name]||'#8888aa';h+='<div class="dashboard-bar-row"><span class="dashboard-bar-label">'+ct2.name+'</span><div class="dashboard-bar"><div class="continent-bar" style="width:'+ct2.rate.toFixed(0)+'%;background:'+col+'"></div></div><span class="dashboard-bar-val" style="color:'+col+'">'+ct2.rate.toFixed(0)+'% ('+ct2.wins+'/'+ct2.total+')</span></div>';});
+// 进球分布
+var goalBins=[0,0,0];
+completed2.forEach(function(m2){var rs=m2.r.split("-");var g=parseInt(rs[0])+parseInt(rs[1]);if(g<=1)goalBins[0]++;else if(g<=3)goalBins[1]++;else goalBins[2]++;});
+h+='<div style="font-size:13px;font-weight:600;color:#aaaacc;margin:10px 0 8px">&#x1F3AF; 进球分布</div>';
+var binLabels=['&#x2264;1球','2-3球','4+球'];
+var binColors=['#ff6666','#ffcc44','#66ffaa'];
+goalBins.forEach(function(b2,i2){var pct2=(b2/completed2.length*100).toFixed(0);h+='<div class="dashboard-bar-row"><span class="dashboard-bar-label">'+binLabels[i2]+'</span><div class="dashboard-bar"><div class="dashboard-bar-fill" style="width:'+pct2+'%;background:'+binColors[i2]+'"></div></div><span class="dashboard-bar-val" style="color:'+binColors[i2]+'">'+pct2+'% ('+b2+'场)</span></div>';});
+// 主客胜率
+var homeWins2=completed2.filter(function(m2){var rs=m2.r.split("-");return parseInt(rs[0])>parseInt(rs[1]);}).length;
+var homeRate=(homeWins2/completed2.length*100).toFixed(1);
+var awayWins2=completed2.filter(function(m2){var rs=m2.r.split("-");return parseInt(rs[1])>parseInt(rs[0]);}).length;
+var awayRate=(awayWins2/completed2.length*100).toFixed(1);
+h+='<div style="margin-top:10px;font-size:12px;color:#aaaacc;line-height:1.7">&#x1F3E0; 主胜：<b style="color:#66ffaa">'+homeRate+'%</b> ('+homeWins2+'场) | &#x1F91D; 平局：<b style="color:#ffcc44">'+drawRate2+'%</b> ('+draws2+'场) | &#x1F3E2; 客胜：<b style="color:#ff6666">'+awayRate+'%</b> ('+awayWins2+'场)</div>';
+// 每日进球趋势
+var dailyGoals={};
+completed2.forEach(function(m2){var day=m2.t.split(' ')[0];var rs=m2.r.split("-");var g=parseInt(rs[0])+parseInt(rs[1]);if(!dailyGoals[day])dailyGoals[day]=0;dailyGoals[day]+=g;});
+var dayKeys=Object.keys(dailyGoals).sort();
+var maxDayGoals=0;
+dayKeys.forEach(function(d){if(dailyGoals[d]>maxDayGoals)maxDayGoals=dailyGoals[d];});
+if(maxDayGoals===0)maxDayGoals=1;
+h+='<div style="font-size:13px;font-weight:600;color:#aaaacc;margin:12px 0 8px">&#x1F4C8; 每日进球趋势</div>';
+h+='<div style="display:flex;align-items:flex-end;gap:3px;height:60px;margin-bottom:4px">';
+dayKeys.forEach(function(d){var g=dailyGoals[d];var h2=Math.max(Math.round(g/maxDayGoals*50),4);var dp=d.split('-');var label=parseInt(dp[1])+'日';h+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;height:'+h2+'px;background:linear-gradient(180deg,#ffaa00,gold);border-radius:3px 3px 0 0;min-width:12px"></div><div style="font-size:9px;color:#aaaacc">'+label+'</div><div style="font-size:10px;font-weight:700;color:gold">'+g+'</div></div>';});
+h+='</div>';
+// 进球王球队TOP5
+var teamGoals={};
+completed2.forEach(function(m2){var rs=m2.r.split("-");if(!teamGoals[m2.h])teamGoals[m2.h]={gf:0,ga:0};if(!teamGoals[m2.a])teamGoals[m2.a]={gf:0,ga:0};teamGoals[m2.h].gf+=parseInt(rs[0]);teamGoals[m2.h].ga+=parseInt(rs[1]);teamGoals[m2.a].gf+=parseInt(rs[1]);teamGoals[m2.a].ga+=parseInt(rs[0]);});
+var goalKings=[];
+Object.keys(teamGoals).forEach(function(t){goalKings.push({name:t,gf:teamGoals[t].gf,ga:teamGoals[t].ga,net:teamGoals[t].gf-teamGoals[t].ga});});
+goalKings.sort(function(a,b){return b.gf-a.gf||b.net-a.net;});
+h+='<div style="font-size:13px;font-weight:600;color:#aaaacc;margin:12px 0 8px">&#x1F3C6; 进球王球队 TOP5</div>';
+h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="color:#8888aa;border-bottom:1px solid rgba(255,215,0,0.15)"><td style="padding:4px 2px;text-align:center">#</td><td style="padding:4px 4px;text-align:left">球队</td><td style="padding:4px 2px;text-align:center;color:#66ffaa">进球</td><td style="padding:4px 2px;text-align:center;color:#ff6666">失球</td><td style="padding:4px 2px;text-align:center;color:gold">净胜</td></tr>';
+goalKings.slice(0,5).forEach(function(t,i){var medal=i===0?'&#x1F947;':i===1?'&#x1F948;':i===2?'&#x1F949;':'';h+='<tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:4px 2px;text-align:center;font-weight:700">'+(medal||(i+1))+'</td><td style="padding:4px 4px;text-align:left;font-weight:600">'+t.name+'</td><td style="padding:4px 2px;text-align:center;color:#66ffaa;font-weight:600">'+t.gf+'</td><td style="padding:4px 2px;text-align:center;color:#ff6666">'+t.ga+'</td><td style="padding:4px 2px;text-align:center;color:gold;font-weight:700">'+(t.net>0?'+':'')+t.net+'</td></tr>';});
+h+='</table>';
+// 排名碾压+胶着分析
+var crushZone=0,crushHit=0,tightZone=0,tightDraw=0;
+completed2.forEach(function(m2){var rh=FIFA_RANK[m2.h]||99,ra=FIFA_RANK[m2.a]||99;var diff=Math.abs(rh-ra);var rs=m2.r.split("-");var hg2=parseInt(rs[0]),ag2=parseInt(rs[1]);if(diff>=20){crushZone++;if(rh<ra&&hg2>ag2)crushHit++;if(ra<rh&&ag2>hg2)crushHit++;}if(diff<=10){tightZone++;if(hg2===ag2)tightDraw++;}});
+var crushRate=crushZone>0?(crushHit/crushZone*100).toFixed(0):'-';
+var tightDrawRate=tightZone>0?(tightDraw/tightZone*100).toFixed(0):'-';
+h+='<div style="font-size:13px;font-weight:600;color:#aaaacc;margin:12px 0 8px">&#x1F4C9; 排名碾压 & 胶着分析</div>';
+h+='<div class="dashboard-grid">';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#66ffaa;font-size:18px">'+crushRate+'%</div><div class="dashboard-label">&#x1F4A0; 碾压命中率 (&#x2265;20位差, '+crushZone+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#ffcc44;font-size:18px">'+tightDrawRate+'%</div><div class="dashboard-label">&#x1F91D; 胶着平局率 (&#x2264;10位差, '+tightZone+'场)</div></div>';
+h+='</div>';
+// 完赛比分一览
+h+='<div style="font-size:13px;font-weight:600;color:#aaaacc;margin:12px 0 8px">&#x1F3CB; 完赛比分一览</div>';
+h+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+completed2.forEach(function(m2){var rs=m2.r.split("-");var hg2=parseInt(rs[0]),ag2=parseInt(rs[1]);var isDraw=hg2===ag2;var isUpset=false;var rh3=FIFA_RANK[m2.h]||99,ra3=FIFA_RANK[m2.a]||99;if(hg2>ag2&&rh3>ra3&&rh3-ra3>15)isUpset=true;if(ag2>hg2&&ra3>rh3&&ra3-rh3>15)isUpset=true;var bg2=isUpset?'rgba(255,102,102,0.15)':isDraw?'rgba(255,204,68,0.12)':'rgba(68,255,170,0.08)';var fc2=isUpset?'#ff6666':isDraw?'#ffcc44':'#66ffaa';var bd=isUpset?'1px solid rgba(255,102,102,0.3)':isDraw?'1px solid rgba(255,204,68,0.3)':'1px solid rgba(68,255,170,0.2)';h+='<div style="padding:3px 6px;border-radius:6px;background:'+bg2+';color:'+fc2+';border:'+bd+';font-size:11px;font-weight:600">'+m2.h+' '+m2.r+' '+m2.a+'</div>';});
+h+='</div>';
+h+='</div>';
+}
+
+h+='<div style="text-align:center;font-size:11px;color:#6666aa;margin-top:10px;padding-bottom:20px">数据来源：2026世界杯小组赛已完赛比赛 | 随赛果更新</div>';
+
+
+c.innerHTML=h;
+}
+
+function renderKnockout(){
+var c=document.getElementById("pg5");
+var completed=M.filter(function(m2){return m2.r;});
+var round2Done=false;
+// Check if at least 2 rounds of group stage are complete (each team has played 2 matches)
+var teamMatches={};
+M.forEach(function(m2){
+if(!teamMatches[m2.h])teamMatches[m2.h]=0;
+if(!teamMatches[m2.a])teamMatches[m2.a]=0;
+if(m2.r){teamMatches[m2.h]++;teamMatches[m2.a]++;}
+});
+var allTeams=Object.keys(teamMatches);
+var minPlayed=allTeams.length>0?allTeams.reduce(function(a,b){return Math.min(a,teamMatches[b])},999):0;
+round2Done=minPlayed>=2;
+
+var h='';
+h+='<div style="text-align:center;padding:10px 0;margin-bottom:12px">';
+h+='<div style="font-size:18px;font-weight:800;color:gold">&#x1F3C6; 淘汰赛赛程</div>';
+h+='<div style="font-size:12px;color:#8888aa;margin-top:4px">48队→32强→16强→8强→4强→决赛</div>';
+h+='</div>';
+
+if(!round2Done){
+h+='<div class="card" style="text-align:center;padding:30px 20px">';
+h+='<div style="font-size:48px;margin-bottom:12px">&#x23F3;</div>';
+h+='<div style="font-size:15px;color:#ccccee;font-weight:600;margin-bottom:8px">小组赛第2轮尚未结束</div>';
+h+='<div style="font-size:13px;color:#8888aa;line-height:1.7">淘汰赛对阵将在小组赛第2轮结束后自动生成<br>届时32强对阵、赛程、AI预测将同步上线</div>';
+h+='<div style="font-size:13px;color:#4488ff;font-weight:600;margin-top:8px">&#x1F4CA; 当前进度：已完赛 '+completed.length+'/72 场小组赛</div>';
+h+='</div>';
+}
+
+// Show bracket structure
+var rounds=[
+{name:'➔ 32强赛（1/16决赛）',date:'7月2日 - 7月6日',matches:'16场：12组第1/2名 + 8个最佳第3名',slots:['A1 vs B3','B1 vs A3/E3','C1 vs D3/E3','D1 vs C3/F3','E1 vs D2','F1 vs E2','G1 vs H2','H1 vs G2','I1 vs J2','J1 vs I2','K1 vs L2','L1 vs K2','A2 vs C2/B2','B2 vs F2/D2','C2 vs ...','D2 vs ...']},
+{name:'➔ 16强赛（1/8决赛）',date:'7月9日 - 7月13日',matches:'8场：32强赛胜者',slots:['32强W1 vs 32强W2','32强W3 vs 32强W4','32强W5 vs 32强W6','32强W7 vs 32强W8','32强W9 vs 32强W10','32强W11 vs 32强W12','32强W13 vs 32强W14','32强W15 vs 32强W16']},
+{name:'➔ 8强赛（1/4决赛）',date:'7月16日 - 7月18日',matches:'4场：16强赛胜者',slots:['16强W1 vs 16强W2','16强W3 vs 16强W4','16强W5 vs 16强W6','16强W7 vs 16强W8']},
+{name:'➔ 半决赛',date:'7月22日 - 7月23日',matches:'2场：8强赛胜者',slots:['8强W1 vs 8强W2','8强W3 vs 8强W4']},
+{name:'➔ 决赛 + 季军赛',date:'7月26日（决赛）',matches:'决赛 + 季军争夺',slots:['半决赛W1 vs 半决赛W2','半决赛L1 vs 半决赛L2']}
+];
+
+h+='<div class="ko-bracket">';
+rounds.forEach(function(r2,i2){
+h+='<div class="ko-round">';
+h+='<div class="ko-round-title">'+r2.name+'</div>';
+h+='<div class="ko-round-date">'+r2.date+'</div>';
+if(i2===0){
+// Show actual group positions for R32
+var groups=["A","B","C","D","E","F","G","H","I","J","K","L"];
+var realSlots=[
+['A1','B3'],['B1','A3'],['C1','D3'],['D1','C3'],
+['E1','D2'],['F1','E2'],['G1','H2'],['H1','G2'],
+['I1','J2'],['J1','I2'],['K1','L2'],['L1','K2'],
+['A2','C2'],['B2','F2'],['E2','A2'],['F2','B2']
+];
+h+='<div style="font-size:11px;color:#aaaacc;margin-bottom:6px">'+r2.matches+'</div>';
+realSlots.forEach(function(sl2){
+h+='<div class="ko-match"><span class="ko-slot">'+sl2[0]+'</span><span class="ko-vs">vs</span><span class="ko-slot">'+sl2[1]+'</span></div>';
+});
+h+='<div style="font-size:10px;color:#6666aa;margin-top:4px">1=组第1名, 2=组第2名, 3=组第3名（最佳8个第3名晋级）</div>';
+}else{
+h+='<div style="font-size:11px;color:#aaaacc;margin-bottom:6px">'+r2.matches+'</div>';
+if(i2<3){
+r2.slots.slice(0,4).forEach(function(sl2){
+h+='<div class="ko-match"><span style="font-size:12px;color:#6666aa">'+sl2+'</span></div>';
+});
+}else{
+r2.slots.forEach(function(sl2){
+h+='<div class="ko-match"><span style="font-size:12px;color:#6666aa">'+sl2+'</span></div>';
+});
+}
+}
+h+='</div>';
+});
+h+='</div>';
+
+// Progress bar
+var progress=Math.round(completed.length/72*100);
+h+='<div class="card" style="margin-top:12px">';
+h+='<div style="font-size:13px;font-weight:600;color:gold;margin-bottom:8px;text-align:center">&#x1F4CA; 小组赛进度</div>';
+h+='<div style="display:flex;align-items:center;gap:10px">';
+h+='<div style="flex:1;height:12px;background:rgba(40,40,70,0.6);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,gold,#ffaa00);border-radius:6px;transition:width .6s"></div></div>';
+h+='<span style="font-size:14px;font-weight:700;color:gold">'+progress+'%</span>';
+h+='</div>';
+h+='<div style="font-size:11px;color:#8888aa;margin-top:4px;text-align:center">'+completed.length+'/72 场已完赛 | 预计7月2日开启淘汰赛</div>';
+h+='</div>';
+
+c.innerHTML=h;
+}
+function renderMatches(){
+var c=document.getElementById("pg0");
+var h='<div class="search-box"><input type="text" class="search-input" id="teamSearch" placeholder="🔍 搜索球队（如：法国、巴西）" value="'+searchQuery+'" oninput="doSearch(this.value)"><div class="search-clear" onclick="clearSearch()">✕</div></div>';
+var groups=["全部"];
+M.forEach(function(m){if(groups.indexOf(m.g)<0)groups.push(m.g)});
+var dates=["全部"];
+M.forEach(function(m){var d=m.t.split(" ")[0];if(dates.indexOf(d)<0)dates.push(d)});
+var matchDates=getMatchDates();
+var months=Object.keys(matchDates).sort();
+h+='<div class="cal-months">';
+h+='<div class="chip'+(curMonth==="全部"?" active":"")+'" onclick="flMonth(\'全部\')">&#x1F4C5;全部</div>';
+months.forEach(function(m){
+var label=m==="06"?"6月":"7月";
+h+='<div class="chip'+(curMonth===m?" active":"")+'" onclick="flMonth(\''+m+'\')">'+label+'</div>';
+});
+h+='</div>';
+if(curMonth!=="全部"){
+h+='<div class="cal-wrap"><div class="cal-grid">';
+var dayNames=['日','一','二','三','四','五','六'];
+dayNames.forEach(function(dn){h+='<div class="cal-head">'+dn+'</div>';});
+var mn=parseInt(curMonth);
+var firstDay=new Date(2026,mn-1,1).getDay();
+var daysInMonth=new Date(2026,mn,0).getDate();
+for(var ei=0;ei<firstDay;ei++){h+='<div></div>';}
+for(var dd=1;dd<=daysInMonth;dd++){
+var hasMatch=matchDates[curMonth]&&matchDates[curMonth][dd];
+var dateStr=curMonth+'-'+(dd<10?'0'+dd:''+dd);
+var isSel=curDate===dateStr;
+var cls='cal-day';
+if(hasMatch)cls+=' has-match';
+if(isSel)cls+=' selected';
+var today=new Date();
+var td=new Date(2026,parseInt(curMonth)-1,dd);
+var tds=today.getFullYear()===2026&&today.getMonth()+1===parseInt(curMonth)&&today.getDate()===dd;
+var isPast=td.setHours(0,0,0,0)<today.setHours(0,0,0,0);
+if(tds)cls+=' today';else if(isPast)cls+=' past';else cls+=' future';
+h+='<div class="'+cls+'" onclick="flDate(\''+dateStr+'\')">'+dd+(tds?'<span class="today-tag">今</span>':'')+(hasMatch?'<span class="cal-badge">'+matchDates[curMonth][dd]+'</span>':'')+'</div>';
+}
+h+='</div></div>';
+}
+if(curMonth==="全部"){
+h+='<div class="chips">';
+groups.forEach(function(g){
+h+='<div class="chip'+(curGroup===g?" active":"")+'" onclick="flGroup(\''+g+'\')">'+g+'</div>';
+});
+h+='</div>';
+}
+var filtered=M;
+if(curDate!=="全部")filtered=filtered.filter(function(m){return m.t.indexOf(curDate)===0});
+if(curGroup!=="全部")filtered=filtered.filter(function(m){return m.g===curGroup});
+if(searchQuery)filtered=filtered.filter(function(m){return m.h.indexOf(searchQuery)>=0||m.a.indexOf(searchQuery)>=0});
+if(filtered.length===0){
+h+='<div class="card" style="text-align:center;padding:30px;color:#8888aa"><div style="font-size:32px;margin-bottom:8px">&#x1F4C5;</div><div style="font-size:14px">当天没有比赛</div></div>';
+}else{
+filtered.forEach(function(m){
+var f=isFollowed(m.id)?" followed":"";
+var fa=isFollowed(m.id)?"&#x2605;":"&#x2606;";
+h+='<div class="card match-card'+f+'" onclick="od('+m.id+')">';
+h+='<div class="follow-btn'+(isFollowed(m.id)?" active":"")+'" onclick="toggleFollow('+m.id+',event)">'+fa+'</div>';
+var cd=m.r?'':getCountdown(m.t);
+var cdCls=m.r?'':getCountdownClass(cd);
+var cdText=m.r?'':getCountdownText(cd);
+h+='<div class="match-top"><span class="match-id">第'+m.id+'场'+(m.r?' <span style="color:#66ffaa;font-size:12px;font-weight:700">&#x2713;已结束</span>':'')+'</span><span class="match-time">'+fmtTime(m.t)+(cdText?' <span class="countdown-tag '+cdCls+'">'+cdText+'</span>':'')+'</span></div>';
+h+='<div class="match-teams">';
+h+='<div class="team-block">'+flagImg(m.h)+'<span class="team-name">'+m.h+'</span>'+(FIFA_RANK[m.h]?'<span class="fifa-rank">#'+FIFA_RANK[m.h]+'</span>':'')+'</div>';
+if(m.r){
+h+='<div class="vs-box" style="background:rgba(68,255,170,0.2);color:#66ffaa;border-color:rgba(68,255,170,0.4);text-shadow:0 0 6px rgba(68,255,170,0.3)">'+m.r+'</div>';
+}else{
+h+='<div class="vs-box">VS</div>';
+}
+h+='<div class="team-block away">'+flagImg(m.a)+'<span class="team-name">'+m.a+'</span>'+(FIFA_RANK[m.a]?'<span class="fifa-rank">#'+FIFA_RANK[m.a]+'</span>':'')+'</div>';
+h+='</div>';
+h+='<div class="match-bottom"><span class="match-group">'+m.g+'组</span><span class="match-venue">'+m.v+'</span></div>';
+if(m.r&&PREDS[m.id]){
+var ap=PREDS[m.id];var rs=m.r.split("-");var rh=parseInt(rs[0]),ra=parseInt(rs[1]);
+var rDir=rh>ra?'W':rh===ra?'D':'L';
+var hw3=0,dw3=0,aw3=0;
+ap.forEach(function(a2){var sc2=a2.score.split("-");var ph3=parseInt(sc2[0]),pa3=parseInt(sc2[1]);if(ph3>pa3)hw3++;else if(ph3===pa3)dw3++;else aw3++;});
+var cDir=hw3>=dw3&&hw3>=aw3?'W':dw3>=hw3&&dw3>=aw3?'D':'L';
+var hit=cDir===rDir;
+var dirL={W:'主胜',D:'平局',L:'客胜'};
+h+='<div class="match-ai-verdict">';
+h+='<span class="verdict-tag '+(hit?'verdict-correct':'verdict-wrong')+'">AI共识 '+(hit?'\u2713':'\u2717')+'</span>';
+h+='<span style="font-size:11px;color:#8888aa">AI看'+dirL[cDir]+' \u2192 实际'+dirL[rDir]+'</span>';
+h+='</div>';
+}
+h+='</div>';
+});
+}
+c.innerHTML=h;
+}
+
+function flGroup(g){
+curGroup=g;
+curDetail=-1;
+renderMatches();
+}
+
+function getWeekday(dateStr){
+var d=new Date('2026-'+dateStr.split(' ')[0]);
+var days=['周日','周一','周二','周三','周四','周五','周六'];
+return days[d.getDay()];
+}
+function fmtTime(t){
+var parts=t.split(' ');
+var dp=parts[0].split('-');
+return parseInt(dp[0])+'/'+parseInt(dp[1])+' '+getWeekday(t)+' '+parts[1];
+}
+
+function getCountdown(t){
+var now=new Date();
+var year=now.getFullYear();
+var parts=t.split(' ');
+var dp=parts[0].split('-');
+var tp=parts[1].split(':');
+var kickoff=new Date(year,parseInt(dp[0])-1,parseInt(dp[1]),parseInt(tp[0]),parseInt(tp[1]));
+var diff=kickoff-now;
+if(diff<0&&diff>-7200000)return 'live';
+if(diff<=0)return 'past';
+var mins=Math.floor(diff/60000);
+if(mins<60)return mins+'分钟后';
+var hrs=Math.floor(mins/60);
+if(hrs<24)return hrs+'小时后';
+var days=Math.floor(hrs/24);
+return days+'天后';
+}
+function getCountdownClass(cd){
+if(cd==='live')return 'countdown-live';
+if(cd==='past')return '';
+if(cd.indexOf('分钟')>=0)return 'countdown-soon';
+if(cd.indexOf('小时')>=0)return 'countdown-hours';
+return 'countdown-days';
+}
+function getCountdownText(cd){
+if(cd==='live')return '⏸ 开球中';
+if(cd==='past')return '';
+var icon=cd.indexOf('分钟')>=0?'⏱':cd.indexOf('小时')>=0?'⏰':'⏳';
+return icon+' '+cd;
+}
+function doSearch(q){
+searchQuery=q.trim();
+renderMatches();
+}
+function clearSearch(){
+searchQuery="";
+var el=document.getElementById("teamSearch");
+if(el)el.value="";
+renderMatches();
+}
+function getMatchDates(){
+var dates={};
+M.forEach(function(m){
+var parts=m.t.split(' ');
+var dp=parts[0].split('-');
+var month=dp[0];
+var day=parseInt(dp[1]);
+if(!dates[month])dates[month]={};
+if(!dates[month][day])dates[month][day]=0;
+dates[month][day]++;
+});
+return dates;
+}
+function flMonth(m){
+curMonth=m;
+if(m==="全部"){curDate="全部";curGroup="全部";}
+else if(curDate!=="全部"&&curDate.indexOf(m)!==0)curDate="全部";
+curDetail=-1;
+renderMatches();
+window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function flDate(d){
+curDate=d;
+if(d!=="全部"){var parts=d.split("-");curMonth=parts[0];}
+curDetail=-1;
+renderMatches();
+window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function od(id){
+curDetail=id;
+renderDetail();
+}
+
+function backToList(){
+curDetail=-1;
+if(curTab===0)renderMatches();
+if(curTab===1)renderFollowed();
+}
+
+function renderDetail(){
+var m=M.find(function(x){return x.id===curDetail});
+if(!m)return;
+var ai=PREDS[m.id];
+var od=ODDS[m.id];
+var followed=isFollowed(m.id);
+var c=document.getElementById("pg1");
+c.classList.add("active");
+document.getElementById("pg0").classList.remove("active");
+document.getElementById("pg2").classList.remove("active");
+document.getElementById("pg3").classList.remove("active");
+document.querySelectorAll(".tab")[curTab].classList.remove("active");
+curTab=1;
+document.querySelectorAll(".tab")[1].classList.add("active");
+
+var h='<div class="detail-back" onclick="backToList()">&#x2190; 返回</div>';
+h+='<div class="detail-header"><div class="detail-teams">';
+h+='<div class="detail-team">'+flagImg(m.h,"detail-flag")+'<span class="detail-team-name">'+m.h+'</span></div>';
+if(m.r){
+h+='<div><span class="detail-score" style="font-size:34px">'+m.r+'</span></div>';
+}else{
+h+='<div><span class="detail-vs">VS</span></div>';
+}
+h+='<div class="detail-team">'+flagImg(m.a,"detail-flag")+'<span class="detail-team-name">'+m.a+'</span></div>';
+h+='</div><div style="font-size:12px;color:#8888aa;margin-top:4px">'+fmtTime(m.t)+' &#xB7; '+m.v+' &#xB7; '+m.g+'组'+(m.r?' <span class="detail-result-badge">&#x2713; 已结束</span>':'')+'</div></div>';
+
+if(!followed){
+h+='<div class="card" style="text-align:center;padding:30px 20px">';
+h+='<div style="font-size:40px;margin-bottom:12px">&#x2B50;</div>';
+h+='<div style="font-size:15px;color:#ccccee;font-weight:600;margin-bottom:8px">关注此比赛</div>';
+h+='<div style="font-size:13px;color:#8888aa;margin-bottom:16px">关注后可在预测页快速查看AI深度分析与赔率数据</div>';
+h+='<div style="display:inline-block;padding:10px 24px;background:linear-gradient(135deg,gold,#ffaa00);color:#12122a;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer" onclick="toggleFollow('+m.id+');renderDetail()">&#x2606; 点击关注</div>';
+h+='</div>';
+}else{
+if(ai){
+ai.forEach(function(a,i){
+h+='<div class="ai-card">';
+h+='<div class="ai-card-header"><div class="ai-avatar" style="background:'+AI_COLORS[i]+'">'+AI_EMOJI[i]+'</div><span class="ai-name">'+a.name+'</span><span class="ai-score">'+a.score+'</span></div>';
+h+='<div class="ai-body">'+a.text+'</div>';
+h+='</div>';
+});
+var homeW=0,drawW=0,awayW=0;
+ai.forEach(function(a){
+var sc=a.score.split("-");
+var ph=parseInt(sc[0]),pa=parseInt(sc[1]);
+if(ph>pa)homeW++;else if(ph===pa)drawW++;else awayW++;
+});
+var total=ai.length;
+var cons=homeW>=3?m.h+"胜（"+homeW+"/"+total+" AI看好）":homeW>=2?m.h+"小胜（"+homeW+"/"+total+" AI看好，存在分歧）":drawW>=2?"平局可能性大（"+drawW+"/"+total+" AI预测平局）":m.a+"爆冷（"+awayW+"/"+total+" AI看好客队）";
+h+='<div class="ai-consensus"><h3>&#x1F91D; AI共识</h3><p>'+cons+'</p>';
+// AI共识反向预警
+if(homeW>=5||awayW>=5){
+var completed3=M.filter(function(m2){return m2.r;});
+var consHit=0,consTotal=0;
+completed3.forEach(function(m2){
+var pr=PREDS[m2.id];if(!pr)return;
+var hw5=0,dw5=0,aw5=0;
+pr.forEach(function(a2){var sc2=a2.score.split("-");if(parseInt(sc2[0])>parseInt(sc2[1]))hw5++;else if(parseInt(sc2[0])===parseInt(sc2[1]))dw5++;else aw5++;});
+if(hw5>=5||aw5>=5){
+consTotal++;
+var rs2=m2.r.split("-");var rd2=parseInt(rs2[0])>parseInt(rs2[1])?'W':parseInt(rs2[0])===parseInt(rs2[1])?'D':'L';
+var cd2=hw5>=5?'W':'L';
+if(cd2===rd2)consHit++;
+}
+});
+var consRate=consTotal>0?(consHit/consTotal*100).toFixed(0):'-';
+h+='<div class="consensus-warning"><b>&#x26A0;&#xFE0F; AI共识预警</b><br>'+Math.max(homeW,awayW)+'/6 AI一致看好'+(homeW>=5?m.h:m.a)+'，但历史AI共识命中率仅 <b>'+consRate+'%</b>！AI共识\u2260正确预测，越是"稳赢"越需警惕翻车。</div>';
+}
+// 平局盲区提示
+var avgDrawPct=0;
+ai.forEach(function(a2){var m2=a2.text.match(/平(\d+)%/);if(m2)avgDrawPct+=parseInt(m2[1]);});
+avgDrawPct=Math.round(avgDrawPct/ai.length);
+if(avgDrawPct<28){
+h+='<div class="draw-blindspot"><b>&#x1F4CA; AI盲区提示</b><br>6个AI平均平局概率仅 <b>'+avgDrawPct+'%</b>，远低于实际大赛平局率(~30%)。AI系统性低估平局概率，此场平局值得特别关注。</div>';
+}
+h+='</div>';
+// 已完赛AI预测vs实际对比
+if(m.r){
+var rs3=m.r.split("-");var rh3=parseInt(rs3[0]),ra3=parseInt(rs3[1]);
+var rDir3=rh3>ra3?'W':rh3===ra3?'D':'L';
+var dirLabels3={W:'主胜',D:'平局',L:'客胜'};
+var dirHit2=0;
+h+='<div class="card" style="margin-top:10px">';
+h+='<div style="font-size:14px;font-weight:700;color:gold;margin-bottom:8px;text-align:center">&#x1F3AF; AI预测 vs 实际结果</div>';
+h+='<div style="display:flex;justify-content:center;gap:12px;margin-bottom:10px;font-size:13px"><span style="color:#66ffaa">实际：'+m.r+' '+dirLabels3[rDir3]+'</span></div>';
+h+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+h+='<tr style="color:#8888aa;border-bottom:1px solid rgba(255,215,0,0.15)"><td style="padding:6px 4px">AI模型</td><td style="padding:6px 4px;text-align:center">预测</td><td style="padding:6px 4px;text-align:center">方向</td><td style="padding:6px 4px;text-align:center">判定</td></tr>';
+ai.forEach(function(a2,i2){
+var sc2=a2.score.split("-");var ph3=parseInt(sc2[0]),pa3=parseInt(sc2[1]);
+var pDir=ph3>pa3?'W':ph3===pa3?'D':'L';
+var isHit=pDir===rDir3;
+var isExact=ph3===rh3&&pa3===ra3;
+if(isHit)dirHit2++;
+h+='<tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:5px 4px"><span style="color:'+AI_COLORS[i2]+'">'+a2.name+'</span></td><td style="padding:5px 4px;text-align:center;font-weight:600">'+a2.score+'</td><td style="padding:5px 4px;text-align:center">'+dirLabels3[pDir]+'</td><td style="padding:5px 4px;text-align:center">'+(isExact?'<span class="ai-verdict-detail ai-verdict-hit">&#x2713; 命中</span>':isHit?'<span class="ai-verdict-detail ai-verdict-hit">&#x2713; 方向</span>':'<span class="ai-verdict-detail ai-verdict-miss">&#x2717; 偏离</span>')+'</td></tr>';
+});
+h+='</table>';
+h+='<div style="text-align:center;margin-top:8px;font-size:12px;color:#aaaacc">方向命中率：<b style="color:'+(dirHit2>=4?'#66ffaa':dirHit2>=2?'#ffcc44':'#ff6666')+'">'+dirHit2+'/'+ai.length+'</b> ('+(dirHit2/ai.length*100).toFixed(0)+'%)</div>';
+h+='</div>';
+}
+}else{
+h+='<div class="card" style="text-align:center;padding:30px 20px">';
+h+='<div style="font-size:40px;margin-bottom:12px">&#x1F916;</div>';
+h+='<div style="font-size:15px;color:#ccccee;font-weight:600;margin-bottom:8px">AI预测尚未生成</div>';
+h+='<div style="font-size:13px;color:#8888aa;margin-bottom:16px">您已关注此比赛。如需生成6大AI模型的深度预测报告，请向AI助手发送请求。</div>';
+h+='<div class="prompt-box" style="text-align:left"><h4>&#x1F4DD; 请求提示词</h4><p>复制以下内容发送给AI助手：</p><code>请为2026世界杯 第'+m.id+'场 '+m.h+' vs '+m.a+' 生成6大AI模型（DeepSeek/ChatGPT/Claude/Gemini/Qwen/Claude Fable）的比分预测与深度分析报告，并附五大博彩平台赔率智能研判。</code></div>';
+h+='</div>';
+}
+if(od){
+h+='<div class="odds-section card">';
+h+='<div class="odds-title">&#x1F3B0; 全球博彩平台实时赔率</div>';
+h+='<table class="odds-table"><tr><th>平台</th><th>主胜</th><th>平局</th><th>客胜</th><th>让球</th></tr>';
+od.platforms.forEach(function(p){
+h+='<tr><td class="plat-name">'+p.name+'</td><td>'+p.win.toFixed(2)+'</td><td>'+p.draw.toFixed(2)+'</td><td>'+p.lose.toFixed(2)+'</td><td>'+p.handicap+'</td></tr>';
+});
+h+='</table>';
+h+='<div class="odds-avg">';
+h+='<div class="odds-avg-item odds-avg-win"><div class="odds-avg-label">平均主胜</div><div class="odds-avg-val">'+od.avgWin.toFixed(2)+'</div></div>';
+h+='<div class="odds-avg-item odds-avg-draw"><div class="odds-avg-label">平均平局</div><div class="odds-avg-val">'+od.avgDraw.toFixed(2)+'</div></div>';
+h+='<div class="odds-avg-item odds-avg-lose"><div class="odds-avg-label">平均客胜</div><div class="odds-avg-val">'+od.avgLose.toFixed(2)+'</div></div>';
+h+='</div>';
+h+='<div class="prob-bar-wrap">';
+h+='<div class="prob-row"><span class="prob-label">胜</span><div class="prob-bar"><div class="prob-fill win" style="width:'+od.impliedWin+'%"></div></div><span class="prob-val">'+od.impliedWin+'%</span></div>';
+h+='<div class="prob-row"><span class="prob-label">平</span><div class="prob-bar"><div class="prob-fill draw" style="width:'+od.impliedDraw+'%"></div></div><span class="prob-val">'+od.impliedDraw+'%</span></div>';
+h+='<div class="prob-row"><span class="prob-label">负</span><div class="prob-bar"><div class="prob-fill lose" style="width:'+od.impliedLose+'%"></div></div><span class="prob-val">'+od.impliedLose+'%</span></div>';
+h+='</div>';
+h+='<div class="odds-analysis"><h4>&#x1F4CA; 赔率智能研判</h4><p>'+od.analysis+'</p></div>';
+h+='</div>';
+}else{
+h+='<div class="card" style="text-align:center;padding:24px 20px;margin-top:12px">';
+h+='<div style="font-size:13px;color:#8888aa">此比赛尚未开盘，赔率将在赛前更新</div>';
+h+='</div>';
+}
+}
+c.innerHTML=h;
+}
+
+function renderFollowed(){
+var c=document.getElementById("pg1");
+if(FOLLOWED.length===0){
+c.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#x2B50;</div><h3>暂无关注比赛</h3><p>前往"赛事"页，点击比赛卡片右上角的星标<br>关注感兴趣的比赛，即可在此查看AI预测</p></div>';
+return;
+}
+var h='';
+var list=M.filter(function(m){return FOLLOWED.indexOf(m.id)>=0});
+list.forEach(function(m){
+var ai=PREDS[m.id];
+var od=ODDS[m.id];
+var hasData=!!(ai||od);
+h+='<div class="card match-card'+(isFollowed(m.id)?' followed':'')+'" onclick="od('+m.id+')">';
+h+='<div class="follow-btn active" onclick="toggleFollow('+m.id+',event)">&#x2605;</div>';
+var cd=m.r?'':getCountdown(m.t);
+var cdCls=m.r?'':getCountdownClass(cd);
+var cdText=m.r?'':getCountdownText(cd);
+h+='<div class="match-top"><span class="match-id">第'+m.id+'场'+(m.r?' <span style="color:#66ffaa;font-size:12px;font-weight:700">&#x2713;已结束</span>':'')+'</span><span class="match-time">'+fmtTime(m.t)+(cdText?' <span class="countdown-tag '+cdCls+'">'+cdText+'</span>':'')+'</span></div>';
+h+='<div class="match-teams">';
+h+='<div class="team-block">'+flagImg(m.h)+'<span class="team-name">'+m.h+'</span>'+(FIFA_RANK[m.h]?'<span class="fifa-rank">#'+FIFA_RANK[m.h]+'</span>':'')+'</div>';
+if(m.r){
+h+='<div class="vs-box" style="background:rgba(68,255,170,0.2);color:#66ffaa;border-color:rgba(68,255,170,0.4);text-shadow:0 0 6px rgba(68,255,170,0.3)">'+m.r+'</div>';
+}else if(ai){
+var cons=ai[0].score;
+h+='<div class="score-box" style="font-size:28px;min-width:50px">'+cons+'</div>';
+}else{
+h+='<div class="vs-box">VS</div>';
+}
+h+='<div class="team-block away">'+flagImg(m.a)+'<span class="team-name">'+m.a+'</span>'+(FIFA_RANK[m.a]?'<span class="fifa-rank">#'+FIFA_RANK[m.a]+'</span>':'')+'</div>';
+h+='</div>';
+h+='<div class="match-bottom"><span class="match-group">'+m.g+'组</span><span style="font-size:12px;color:'+(hasData?'#66ffaa':'#8888aa')+'">'+(hasData?'&#x2705; 已有AI预测':'&#x23F3; 等待分析')+'</span></div>';
+if(m.r&&PREDS[m.id]){
+var ap4=PREDS[m.id];var rs4=m.r.split("-");var rh4=parseInt(rs4[0]),ra4=parseInt(rs4[1]);
+var rDir4=rh4>ra4?'W':rh4===ra4?'D':'L';
+var hw4=0,dw4=0,aw4=0;
+ap4.forEach(function(a3){var sc3=a3.score.split("-");var ph4=parseInt(sc3[0]),pa4=parseInt(sc3[1]);if(ph4>pa4)hw4++;else if(ph4===pa4)dw4++;else aw4++;});
+var cDir4=hw4>=dw4&&hw4>=aw4?'W':dw4>=hw4&&dw4>=aw4?'D':'L';
+var hit4=cDir4===rDir4;
+var dirL4={W:'主胜',D:'平局',L:'客胜'};
+h+='<div class="match-ai-verdict">';
+h+='<span class="verdict-tag '+(hit4?'verdict-correct':'verdict-wrong')+'">AI共识 '+(hit4?'\u2713':'\u2717')+'</span>';
+h+='<span style="font-size:11px;color:#8888aa">AI看'+dirL4[cDir4]+' \u2192 实际'+dirL4[rDir4]+'</span>';
+h+='</div>';
+}
+h+='</div>';
+});
+c.innerHTML=h;
+}
+
+
+function renderOddsPage(){
+var c=document.getElementById("pg2");
+var keys=Object.keys(ODDS).filter(function(k){return FOLLOWED.indexOf(parseInt(k))>=0});
+if(keys.length===0){c.innerHTML='<div class="card" style="text-align:center;color:#8888aa;padding:40px"><div style="font-size:32px;margin-bottom:12px">&#x1F4B0;</div><div style="font-size:15px;font-weight:600;margin-bottom:8px">暂无真实AI预测+赔率数据</div><div style="font-size:13px">请关注已开盘的比赛（目前24场有真实赔率）</div></div><div class="card" style="text-align:center;padding:10px 16px;font-size:12px;color:#aaaacc;background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.15)">&#x1F4CA 赔率数据来源：digital-sanctuary.net / worldcup-odds.com | 更新：2026-06-11</div>';return}
+var h='<div class="card" style="text-align:center;padding:10px 16px;font-size:12px;color:#aaaacc;background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.15)">&#x1F4CA 赔率数据来源：digital-sanctuary.net / worldcup-odds.com | 更新：2026-06-11</div>';
+keys.forEach(function(k){
+var od=ODDS[k];
+var m=M.find(function(x){return x.id==k});
+if(!m)return;
+h+='<div class="card odds-page-card">';
+h+='<div class="odds-page-header">'+flagImg(m.h,"rank-flag")+' <span class="odds-page-teams">'+m.h+' vs '+m.a+'</span> '+flagImg(m.a,"rank-flag")+'</div>';
+h+='<div style="display:flex;justify-content:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">';
+h+='<span style="font-size:13px;color:#66ffaa">胜 '+od.impliedWin+'%</span>';
+h+='<span style="font-size:13px;color:#ffcc44">平 '+od.impliedDraw+'%</span>';
+h+='<span style="font-size:13px;color:#ff6666">负 '+od.impliedLose+'%</span>';
+h+='</div>';
+h+='<div class="prob-bar-wrap">';
+h+='<div class="prob-row"><span class="prob-label">胜</span><div class="prob-bar"><div class="prob-fill win" style="width:'+od.impliedWin+'%"></div></div><span class="prob-val">'+od.impliedWin+'%</span></div>';
+h+='<div class="prob-row"><span class="prob-label">平</span><div class="prob-bar"><div class="prob-fill draw" style="width:'+od.impliedDraw+'%"></div></div><span class="prob-val">'+od.impliedDraw+'%</span></div>';
+h+='<div class="prob-row"><span class="prob-label">负</span><div class="prob-bar"><div class="prob-fill lose" style="width:'+od.impliedLose+'%"></div></div><span class="prob-val">'+od.impliedLose+'%</span></div>';
+h+='</div>';
+h+='<table class="odds-table"><tr><th>平台</th><th>主胜</th><th>平局</th><th>客胜</th><th>让球</th></tr>';
+od.platforms.forEach(function(p){
+h+='<tr><td class="plat-name">'+p.name+'</td><td>'+p.win.toFixed(2)+'</td><td>'+p.draw.toFixed(2)+'</td><td>'+p.lose.toFixed(2)+'</td><td>'+p.handicap+'</td></tr>';
+});
+h+='</table>';
+h+='<div class="odds-analysis"><h4>&#x1F4CA; 赔率智能研判</h4><p>'+od.analysis+'</p></div>';
+h+='</div>';
+});
+c.innerHTML=h;
+}
+
+var refreshTypeVal="all",refreshScopeVal="followed",refreshGroupVal="A";
+
+function showRefreshModal(){
+document.getElementById("refreshModal").classList.add("show");
+initGroupChips();
+genRefreshPrompt();
+}
+function hideRefreshModal(){
+document.getElementById("refreshModal").classList.remove("show");
+document.getElementById("copiedTip").classList.remove("show");
+}
+function setRefreshOpt(el,groupId){
+var opts=document.getElementById(groupId).querySelectorAll(".modal-opt");
+opts.forEach(function(o){o.classList.remove("active")});
+el.classList.add("active");
+if(groupId==="refreshType")refreshTypeVal=el.getAttribute("data-val");
+if(groupId==="refreshScope"){
+refreshScopeVal=el.getAttribute("data-val");
+document.getElementById("groupSelect").style.display=(refreshScopeVal==="group")?"block":"none";
+}
+genRefreshPrompt();
+}
+function setGroupChip(el){
+var chips=document.getElementById("refreshGroups").querySelectorAll(".modal-opt");
+chips.forEach(function(c){c.classList.remove("active")});
+el.classList.add("active");
+refreshGroupVal=el.getAttribute("data-val");
+genRefreshPrompt();
+}
+function initGroupChips(){
+var gc=document.getElementById("refreshGroups");
+if(gc.children.length>0)return;
+var groups=[];
+M.forEach(function(m){if(groups.indexOf(m.g)<0)groups.push(m.g)});
+var h='';
+groups.forEach(function(g,i){
+h+='<div class="modal-opt'+(i===0?" active":"")+'" data-val="'+g+'" onclick="setGroupChip(this)">'+g+'组</div>';
+});
+gc.innerHTML=h;
+}
+function getTargetMatches(){
+if(refreshScopeVal==="followed")return M.filter(function(m){return FOLLOWED.indexOf(m.id)>=0});
+if(refreshScopeVal==="group")return M.filter(function(m){return m.g===refreshGroupVal});
+return M;
+}
+function genRefreshPrompt(){
+var matches=getTargetMatches();
+if(matches.length===0){
+document.getElementById("refreshPrompt").textContent="当前范围没有比赛，请先关注比赛或选择其他范围。";
+return;
+}
+var typeLabel=refreshTypeVal==="all"?"比分预测和赔率数据":refreshTypeVal==="pred"?"比分预测":"赔率数据";
+var scopeLabel=refreshScopeVal==="followed"?"已关注的"+matches.length+"场比赛":refreshScopeVal==="group"?refreshGroupVal+"组的"+matches.length+"场比赛":"全部"+matches.length+"场比赛";
+var lines=["请更新以下"+scopeLabel+"的最新"+typeLabel+"，基于全网最新资源（球队近期状态、伤病信息、赔率变化等）：",""];
+matches.forEach(function(m){
+var hasPred=PREDS[m.id];
+var hasOdds=ODDS[m.id];
+var status=(hasPred?"[已有预测]":"[无预测]")+" "+(hasOdds?"[已有赔率]":"[无赔率]");
+lines.push("- "+m.h+" vs "+m.a+"（"+m.t+"，"+m.v+"）"+status);
+});
+lines.push("");
+lines.push("要求：");
+lines.push("1. 搜索各球队近期状态、伤病、友谊赛表现等最新信息");
+if(refreshTypeVal==="all"||refreshTypeVal==="pred"){
+lines.push("2. 用5个AI模型（DeepSeek/ChatGPT/Claude/Gemini/Qwen）分别给出比分预测和深度分析");
+}
+if(refreshTypeVal==="all"||refreshTypeVal==="odds"){
+lines.push((refreshTypeVal==="all"?"3":"2")+". 查找五大博彩平台（Bet365/William Hill/1xBet/Pinnacle/DraftKings）最新赔率");
+lines.push((refreshTypeVal==="all"?"4":"3")+". 计算隐含概率并给出赔率智能研判");
+}
+document.getElementById("refreshPrompt").textContent=lines.join("\n");
+}
+function copyRefreshPrompt(){
+var text=document.getElementById("refreshPrompt").textContent;
+if(!text||text.indexOf("请选择")>=0)return;
+try{
+var ta=document.createElement("textarea");
+ta.value=text;
+ta.style.position="fixed";
+ta.style.left="-9999px";
+document.body.appendChild(ta);
+ta.select();
+document.execCommand("copy");
+document.body.removeChild(ta);
+}catch(e){}
+document.getElementById("copiedTip").classList.add("show");
+setTimeout(function(){document.getElementById("copiedTip").classList.remove("show");},2500);
+}
+
+renderMatches();
+
+// Visit counter
+(function(){
+try{
+var xhr=new XMLHttpRequest();
+xhr.open('GET','https://api.counterapi.dev/v1/worldcup2026ai/visits/up',true);
+xhr.onload=function(){try{var r=JSON.parse(xhr.responseText);var el=document.getElementById('visitNum');if(el&&r.count)el.textContent=r.count}catch(e){}};
+xhr.send();
+}catch(e){}
+})();
+</script>
+<div class="disclaimer">
+&#x26A0;&#xFE0F; 免责声明：本站AI预测和赔率数据仅供娱乐参考，不构成任何投注建议。预测结果由AI模型生成，准确性不保证。请理性看待，切勿用于非法赌博。数据来源：<a href="https://modelverify.ai" target="_blank">modelverify.ai</a> / <a href="https://www.digital-sanctuary.net" target="_blank">digital-sanctuary.net</a>
+<div class="visit-count" id="visitCount">&#x1F465; 访问量：<span id="visitNum">-</span></div>
+</div>
+</div>
+</body>
+</html>
