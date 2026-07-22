@@ -229,8 +229,8 @@ body{background:#12122a;color:#e0e0f0;font-family:-apple-system,BlinkMacSystemFo
 <div class="glow glow2"></div>
 <div class="header">
 <h1>2026世界杯AI预言家</h1>
-<div class="sub">72场小组赛完赛 · 32强争冠 · 6大AI分析 · 仪表盘</div>
-<div id="updateTime" style="font-size:12px;color:#ddaa33;margin-top:4px;font-weight:600">&#x1F552; 数据更新：2026-07-19 12:45</div>
+<div class="sub">🏆西班牙夺冠 · 104场全记录 · 6大AI分析 · 多维复盘</div>
+<div id="updateTime" style="font-size:12px;color:#ddaa33;margin-top:4px;font-weight:600">&#x1F552; 数据更新：2026-07-22 收官版</div>
 </div>
 <div class="tabs">
 <div class="tab active" onclick="swTab(5)">&#x1F3C6;争冠</div>
@@ -239,6 +239,7 @@ body{background:#12122a;color:#e0e0f0;font-family:-apple-system,BlinkMacSystemFo
 <div class="tab" onclick="swTab(3)">&#x1F4CA;仪表</div>
 <div class="tab" onclick="swTab(4)">&#x1F4CB;数据</div>
 <div class="tab" onclick="swTab(0)">&#x26BD;赛事</div>
+<div class="tab" onclick="swTab(6)">&#x1F50D;分析</div>
 </div>
 <div id="pg0" class="page"></div>
 <div id="pg1" class="page"></div>
@@ -246,6 +247,7 @@ body{background:#12122a;color:#e0e0f0;font-family:-apple-system,BlinkMacSystemFo
 <div id="pg3" class="page"></div>
 <div id="pg4" class="page"></div>
 <div id="pg5" class="page active"></div>
+<div id="pg6" class="page"></div>
 <!-- 刷新数据模态框 -->
 <div class="modal-overlay" id="refreshModal">
 <div class="modal-box">
@@ -400,7 +402,7 @@ var KO=[
 // 季军赛（3/4名）
 {id:103,round:"R2",t:"07-19 05:00",h:"法国",a:"英格兰",v:"迈阿密Hard Rock球场",r:"4-6"},
 // 决赛
-{id:104,round:"R1",t:"07-20 03:00",h:"西班牙",a:"阿根廷",v:"纽约/新泽西体育场"}
+{id:104,round:"R1",t:"07-20 03:00",h:"西班牙",a:"阿根廷",v:"纽约/新泽西体育场",r:"1-0(加时)"}
 ];
 
 var PREDS={
@@ -549,6 +551,7 @@ if(i===2)renderOddsPage();
 if(i===3)renderDashboard();
 if(i===4)renderStats();
 if(i===5)renderKnockout();
+if(i===6)renderAnalysis();
 }
 
 var SCORERS=[
@@ -705,7 +708,8 @@ var SCORERS=[
 {r:5,p:"戈登",t:"英格兰",g:1,m:1},
 {r:5,p:"萨卡",t:"英格兰",g:3,m:1},
 {r:5,p:"赖斯",t:"英格兰",g:1,m:1},
-{r:5,p:"孔萨",t:"英格兰",g:1,m:1}
+{r:5,p:"孔萨",t:"英格兰",g:1,m:1},
+{r:3,p:"费兰·托雷斯",t:"西班牙",g:1,m:1}
 ];
 var ASSISTS=[
 {r:1,p:"翁达夫",t:"德国",a:2,m:1},
@@ -745,7 +749,8 @@ var ASSISTS=[
 {r:5,p:"奥尔莫",t:"西班牙",a:1,m:1},
 {r:5,p:"罗杰斯",t:"英格兰",a:1,m:1},
 {r:5,p:"埃泽",t:"英格兰",a:1,m:1},
-{r:5,p:"拉什福德",t:"英格兰",a:1,m:1}
+{r:5,p:"拉什福德",t:"英格兰",a:1,m:1},
+{r:3,p:"尼科·威廉斯",t:"西班牙",a:1,m:1}
 ]
 
 function renderStats(){
@@ -1101,6 +1106,206 @@ h+='</div>';
 
 c.innerHTML=h;
 }
+
+function renderAnalysis(){
+var c=document.getElementById("pg6");
+var h="";
+function ps2(r){var b=r.replace(/[（(].*?[）)]/g,"").trim();var p=b.split("-");return [parseInt(p[0]),parseInt(p[1])];}
+function mg(r){var g=ps2(r);return g[0]+g[1];}
+function isDraw(m){var g=ps2(m.r);return g[0]===g[1];}
+var allM=M.concat(KO);
+var allDone=allM.filter(function(x){return x.r;});
+var totalMatches=allDone.length;
+var totalGoals=0;allDone.forEach(function(x){totalGoals+=mg(x.r);});
+var avgGoals=(totalGoals/totalMatches).toFixed(2);
+var draws=allDone.filter(isDraw).length;
+var drawRate=(draws/totalMatches*100).toFixed(1);
+var cs=allDone.filter(function(x){var g=ps2(x.r);return g[0]===0||g[1]===0;}).length;
+var csRate=(cs/totalMatches*100).toFixed(1);
+var big=allDone.filter(function(x){var g=ps2(x.r);return Math.abs(g[0]-g[1])>=3;}).length;
+var bigRate=(big/totalMatches*100).toFixed(1);
+var biggest=0,bigMatch="";
+allDone.forEach(function(x){var g=ps2(x.r);var d=Math.abs(g[0]-g[1]);if(d>biggest){biggest=d;bigMatch=x.h+" "+x.r+" "+x.a;}});
+
+h+='<div class="card" style="background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(30,30,60,0.9));border-color:rgba(255,215,0,0.3)">';
+h+='<div style="text-align:center">';
+h+='<div style="font-size:30px">🏆</div>';
+h+='<div style="font-size:20px;font-weight:800;color:gold;margin:4px 0">西班牙 加冕 2026 世界杯</div>';
+h+='<div style="font-size:13px;color:#ccccee">决赛 1-0 加时绝杀阿根廷 · 时隔16年再度捧杯 · 全届8场仅丢1球</div>';
+h+='<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center">';
+h+='<div style="flex:1;min-width:70px;background:rgba(0,0,0,0.25);border-radius:8px;padding:6px"><div style="font-size:18px;font-weight:800;color:gold">'+totalMatches+'</div><div style="font-size:10px;color:#8888aa">总场次</div></div>';
+h+='<div style="flex:1;min-width:70px;background:rgba(0,0,0,0.25);border-radius:8px;padding:6px"><div style="font-size:18px;font-weight:800;color:#66ffaa">'+totalGoals+'</div><div style="font-size:10px;color:#8888aa">总进球</div></div>';
+h+='<div style="flex:1;min-width:70px;background:rgba(0,0,0,0.25);border-radius:8px;padding:6px"><div style="font-size:18px;font-weight:800;color:#ffcc44">'+avgGoals+'</div><div style="font-size:10px;color:#8888aa">场均进球</div></div>';
+h+='<div style="flex:1;min-width:70px;background:rgba(0,0,0,0.25);border-radius:8px;padding:6px"><div style="font-size:18px;font-weight:800;color:#ffaa00">10</div><div style="font-size:10px;color:#8888aa">金靴(姆巴佩)</div></div>';
+h+='</div></div></div>';
+
+h+='<div class="stats-section-title">👑 冠军之路 · 西班牙 8 战全回顾</div>';
+h+='<div class="card">';
+var esp=allDone.filter(function(x){return x.h==="西班牙"||x.a==="西班牙";}).sort(function(a,b){return a.t<b.t?-1:(a.t>b.t?1:0);});
+esp.forEach(function(x){
+  var home=x.h==="西班牙";
+  var opp=home?x.a:x.h;
+  var g=ps2(x.r);
+  var sG=home?g[0]:g[1], oG=home?g[1]:g[0];
+  var win=(home&&g[0]>g[1])||(!home&&g[1]>g[0]);
+  var draw=g[0]===g[1];
+  var col=win?'#66ffaa':draw?'#ffcc44':'#ff6666';
+  var tag=win?'胜':draw?'平':'负';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,0.05)">';
+  h+='<div style="font-size:11px;color:#8888aa;min-width:64px">'+x.t+'</div>';
+  h+=flagImg(opp,"ko-flag");
+  h+='<div style="flex:1;font-size:13px;color:#e0e0f0">'+opp+'</div>';
+  h+='<div style="font-size:15px;font-weight:800;color:'+col+'">'+sG+'<span style="color:#6666aa">-</span>'+oG+'</div>';
+  h+='<div style="font-size:10px;color:'+col+';min-width:22px;text-align:center">'+tag+'</div>';
+  h+='</div>';
+});
+h+='<div style="font-size:11px;color:#8888aa;margin-top:6px;line-height:1.6">淘汰赛连克奥地利→葡萄牙→比利时→法国→阿根廷，含金量无可争议。整届仅失1球，传控体系封神。</div>';
+h+='</div>';
+
+h+='<div class="stats-section-title">🌍 各大洲战力榜（全'+totalMatches+'场）</div>';
+h+='<div class="card">';
+var cont={};
+allDone.forEach(function(x){
+  var hc=CONTINENT[x.h]||"其他",ac=CONTINENT[x.a]||"其他";
+  var g=ps2(x.r);var hw=g[0]>g[1],aw=g[1]>g[0];
+  if(!cont[hc])cont[hc]={w:0,t:0};cont[hc].t++;if(hw)cont[hc].w++;
+  if(!cont[ac])cont[ac]={w:0,t:0};cont[ac].t++;if(aw)cont[ac].w++;
+});
+var contArr=[];
+Object.keys(cont).forEach(function(k){contArr.push({name:k,w:cont[k].w,t:cont[k].t,rate:cont[k].w/cont[k].t*100});});
+contArr.sort(function(a,b){return b.rate-a.rate;});
+contArr.forEach(function(ct){
+  var col=CONT_COLOR[ct.name]||"#8888aa";
+  h+='<div style="display:flex;align-items:center;gap:8px;margin:6px 0">';
+  h+='<div style="font-size:12px;color:#ccccee;min-width:48px">'+ct.name+'</div>';
+  h+='<div style="flex:1;height:14px;background:rgba(40,40,70,0.8);border-radius:7px;overflow:hidden"><div style="height:100%;width:'+ct.rate.toFixed(0)+'%;background:'+col+';border-radius:7px"></div></div>';
+  h+='<div style="font-size:12px;font-weight:700;color:'+col+';min-width:82px;text-align:right">'+ct.rate.toFixed(0)+'% ('+ct.w+'/'+ct.t+')</div>';
+  h+='</div>';
+});
+h+='<div style="font-size:11px;color:#8888aa;margin-top:8px;line-height:1.6">🏆 冠军：欧洲(西班牙)｜四强欧洲3席+南美1席(阿根廷)。非洲佛得角历史性小组出线，亚洲、北美多队取得进球突破。</div>';
+h+='</div>';
+
+h+='<div class="stats-section-title">📊 数据总览（全赛事）</div>';
+h+='<div class="dashboard-grid">';
+h+='<div class="dashboard-item"><div class="dashboard-val">'+totalMatches+'</div><div class="dashboard-label">已完赛</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#ffcc44">'+drawRate+'%</div><div class="dashboard-label">平局率('+draws+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val">'+avgGoals+'</div><div class="dashboard-label">场均进球</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#ff6666">'+bigRate+'%</div><div class="dashboard-label">大比分率('+big+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="color:#4488ff">'+csRate+'%</div><div class="dashboard-label">零封率('+cs+'场)</div></div>';
+h+='<div class="dashboard-item"><div class="dashboard-val" style="font-size:13px">'+bigMatch+'</div><div class="dashboard-label">最大分差('+biggest+'球)</div></div>';
+h+='</div>';
+
+h+='<div class="stats-section-title">🐎 黑马 & 爆冷</div>';
+h+='<div class="card">';
+h+='<div style="padding:8px;background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.2);border-radius:8px;margin-bottom:8px">';
+h+='<div style="font-size:13px;font-weight:700;color:#ffaa00">🚩 最大黑马：佛得角</div>';
+h+='<div style="font-size:12px;color:#ccccee;margin-top:4px;line-height:1.6">H组以小组第二历史性晋级32强(队史世界杯首秀即出线)，小组赛爆冷战平冠军西班牙，32强赛仅2-3惜败卫冕冠军阿根廷。48队扩军最大受益者。</div>';
+h+='</div>';
+var upsets=[];
+allDone.forEach(function(x){
+  var rh=FIFA_RANK[x.h]||99,ra=FIFA_RANK[x.a]||99;
+  var g=ps2(x.r);var hw=g[0]>g[1],aw=g[1]>g[0];
+  if(hw&&ra<rh&&rh-ra>15)upsets.push({m:x,diff:rh-ra});
+  if(aw&&rh<ra&&ra-rh>15)upsets.push({m:x,diff:ra-rh});
+});
+upsets.sort(function(a,b){return b.diff-a.diff;});
+if(upsets.length>0){
+  h+='<div style="font-size:12px;color:#aaaacc;margin-bottom:6px">排名悬殊下的逆袭(低排名胜高排名≥15位)：</div>';
+  upsets.slice(0,6).forEach(function(u){
+    h+='<div style="display:flex;align-items:center;gap:6px;padding:5px 4px;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04)">';
+    h+='<span style="color:#ff6666;font-weight:700;font-size:13px">'+u.m.r+'</span>';
+    h+=flagImg(u.m.h,"ko-flag")+'<span style="color:#e0e0f0">'+u.m.h+'</span>';
+    h+='<span style="color:#6666aa">vs</span>';
+    h+=flagImg(u.m.a,"ko-flag")+'<span style="color:#e0e0f0">'+u.m.a+'</span>';
+    h+='<span style="margin-left:auto;color:#8888aa;font-size:10px">差'+u.diff+'位</span>';
+    h+='</div>';
+  });
+}else{
+  h+='<div style="font-size:12px;color:#8888aa">本届强弱对话整体符合排名预期。</div>';
+}
+h+='</div>';
+
+h+='<div class="stats-section-title">⚽ 金靴 & 助攻王</div>';
+h+='<div class="card">';
+var ts=SCORERS.slice().sort(function(a,b){return b.g-a.g||a.m-b.m;}).slice(0,6);
+h+='<div style="font-size:12px;color:#ffcc44;font-weight:600;margin-bottom:4px">射手榜 TOP6</div>';
+ts.forEach(function(s,i){
+  var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid rgba(255,255,255,0.04)">';
+  h+='<span style="font-size:13px;min-width:24px">'+medal+'</span>';
+  h+='<span style="flex:1;font-size:13px;color:#e0e0f0">'+s.p+'</span>';
+  h+='<span style="font-size:11px;color:#8888aa">'+s.t+'</span>';
+  h+='<span style="font-size:15px;font-weight:800;color:gold">'+s.g+'</span>';
+  h+='</div>';
+});
+var ta=ASSISTS.slice().sort(function(a,b){return b.a-a.a||a.m-b.m;}).slice(0,6);
+h+='<div style="font-size:12px;color:#66ffaa;font-weight:600;margin:10px 0 4px">助攻榜 TOP6</div>';
+ta.forEach(function(s,i){
+  var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid rgba(255,255,255,0.04)">';
+  h+='<span style="font-size:13px;min-width:24px">'+medal+'</span>';
+  h+='<span style="flex:1;font-size:13px;color:#e0e0f0">'+s.p+'</span>';
+  h+='<span style="font-size:11px;color:#8888aa">'+s.t+'</span>';
+  h+='<span style="font-size:15px;font-weight:800;color:#66ffaa">'+s.a+'</span>';
+  h+='</div>';
+});
+h+='<div style="font-size:11px;color:#8888aa;margin-top:6px">姆巴佩10球蝉联金靴并加冕世界杯历史总射手王(22球)；梅西8球4助银靴；奥利塞以7助荣膺助攻王。</div>';
+h+='</div>';
+
+h+='<div class="stats-section-title">🏅 国际足联个人奖项</div>';
+h+='<div class="card" style="display:flex;flex-wrap:wrap;gap:8px">';
+var awards=[["🥇 金球奖","罗德里(西班牙)","中场大脑"],["⚽ 金靴奖","姆巴佩(法国)","10球"],["🧤 金手套","乌奈·西蒙(西班牙)","最佳门将"],["🌟 最佳新秀","库巴西(西班牙)","后防新星"],["🎯 决赛MVP","费兰·托雷斯","加时绝杀"]];
+awards.forEach(function(a){
+  h+='<div style="flex:1;min-width:120px;background:rgba(0,0,0,0.25);border-radius:8px;padding:8px;border:1px solid rgba(255,215,0,0.12)">';
+  h+='<div style="font-size:13px;font-weight:700;color:gold">'+a[0]+'</div>';
+  h+='<div style="font-size:12px;color:#e0e0f0;margin-top:3px">'+a[1]+'</div>';
+  h+='<div style="font-size:10px;color:#8888aa;margin-top:2px">'+a[2]+'</div>';
+  h+='</div>';
+});
+h+='</div>';
+
+h+='<div class="stats-section-title">🤖 AI预言家复盘（小组赛72场）</div>';
+h+='<div class="card">';
+var completed=M.filter(function(x){return x.r;});
+var aiStats=[];
+AI_NAMES.forEach(function(nm,idx){
+  var dirHit=0,exactHit=0,total=0;
+  completed.forEach(function(x){
+    var pr=PREDS[x.id];if(!pr)return;var p=pr[idx];if(!p)return;total++;
+    var ps=p.score.split("-");var ph=parseInt(ps[0]),pa=parseInt(ps[1]);
+    var rs=x.r.split("-");var rh=parseInt(rs[0]),ra=parseInt(rs[1]);
+    var pDir=ph>pa?'W':ph===pa?'D':'L';
+    var rDir=rh>ra?'W':rh===ra?'D':'L';
+    if(pDir===rDir)dirHit++;
+    if(ph===rh&&pa===ra)exactHit++;
+  });
+  aiStats.push({name:nm,idx:idx,dirRate:total>0?dirHit/total*100:0,exactRate:total>0?exactHit/total*100:0,total:total});
+});
+aiStats.sort(function(a,b){return b.dirRate-a.dirRate;});
+h+='<table class="ai-rank-table"><tr><th style="width:30px">#</th><th style="text-align:left">AI模型</th><th>方向命中</th><th>精确比分</th></tr>';
+aiStats.forEach(function(s,i){
+  var dc=s.dirRate<40?'ai-pct ai-pct-low':s.dirRate<60?'ai-pct ai-pct-mid':'ai-pct ai-pct-high';
+  var ec=s.exactRate<10?'ai-pct ai-pct-low':s.exactRate<20?'ai-pct ai-pct-mid':'ai-pct ai-pct-high';
+  h+='<tr><td>'+(i+1)+'</td><td style="text-align:left"><div class="ai-rank-name"><div class="ai-rank-avatar" style="background:'+AI_COLORS[s.idx]+'">'+AI_EMOJI[s.idx]+'</div>'+s.name+'</div></td><td class="'+dc+'">'+s.dirRate.toFixed(0)+'%</td><td class="'+ec+'">'+s.exactRate.toFixed(0)+'%</td></tr>';
+});
+h+='</table>';
+h+='<div style="font-size:11px;color:#8888aa;margin-top:8px;line-height:1.6">⚠️ 赛前6大AI中5个预测法国夺冠、GPT 5.5预测阿根廷夺冠——最终西班牙笑到最后，AI集体错判冠军。但小组赛方向命中率整体可观，精确比分仍是大难题。</div>';
+h+='</div>';
+
+h+='<div class="stats-section-title">🎭 名场面 & 趣闻</div>';
+h+='<div class="card" style="font-size:12px;color:#ccccee;line-height:1.8">';
+h+='• 🇪🇸 西班牙时隔16年再夺冠，全届8场仅失1球，传控体系封神。<br>';
+h+='• 🇦🇷 阿根廷卫冕失利，梅西赛后落泪，却以风度祝贺对手，堪称足坛佳话。<br>';
+h+='• 🟥 决赛恩佐两黄变红，帕雷德斯锁喉冲突被追加红牌，颁奖台爆发大规模冲突。<br>';
+h+='• 🤝 特朗普迟迟不愿离开领奖台，西班牙官方夺冠合影直接将其剪裁。<br>';
+h+='• 🌍 48队扩军首届开局良好，佛得角等亚非新军登台，打破"扩军必注水"成见。<br>';
+h+='• 🤖 上海WAIC大会上AI预测西班牙夺冠(决赛前夕翻盘看好西班牙)，一语成谶。';
+h+='</div>';
+
+h+='<div style="text-align:center;font-size:11px;color:#6666aa;margin-top:10px;padding-bottom:20px">2026美加墨世界杯 · 全景复盘 · 数据截至决赛收官</div>';
+c.innerHTML=h;
+}
+
 function renderMatches(){
 var c=document.getElementById("pg0");
 var h='<div class="search-box"><input type="text" class="search-input" id="teamSearch" placeholder="🔍 搜索球队（如：法国、巴西）" value="'+searchQuery+'" oninput="doSearch(this.value)"><div class="search-clear" onclick="clearSearch()">✕</div></div>';
